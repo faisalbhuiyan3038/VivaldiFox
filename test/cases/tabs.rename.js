@@ -1,0 +1,11 @@
+const t = await openTab(page("<title>Original</title>x"));
+assert($("#vfx-rename-tab"), "menu item");
+win.vfxRenameTab(t, "My Name");
+assert(t.label === "My Name", "label set: " + t.label);
+t.linkedBrowser.loadURI(Services.io.newURI(page("<title>Second</title>y")), { triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal() });
+await waitFor(() => t.linkedBrowser.contentTitle === "Second", "navigated");
+await sleep(300);
+assert(t.label === "My Name", "label survives navigation: " + t.label);
+win.vfxRenameTab(t, "");
+await waitFor(() => t.label === "Second", "restored page title");
+return "custom title set, survives navigation, clears back to page title";

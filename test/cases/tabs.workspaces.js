@@ -1,0 +1,24 @@
+const W = await waitFor(() => win.vfxWorkspaces, "feature ready");
+const btn = await waitFor(() => $("#vfx-workspaces"), "widget");
+assert($("#vfx-ws-move"), "tab menu entry");
+const a = await openTab(web("<title>WA</title>a")); const b = await openTab(web("<title>WB</title>b"));
+gBrowser.selectedTab = a;
+const total = gBrowser.tabs.length;
+const ws = W.create("Work");
+assert(W.active() === ws.id, "switched to the new workspace");
+await waitFor(() => a.hidden && b.hidden, "other workspace's tabs hidden");
+assert(gBrowser.tabs.length === total + 1 && !gBrowser.selectedTab.hidden, "empty workspace got its own tab; nothing closed");
+assert(btn.getAttribute("label") === "Work", "button shows workspace name");
+const c = await openTab(web("<title>WC</title>c"));
+assert(W.wsOf(c) === ws.id, "new tab belongs to the active workspace");
+W.switchTo("default");
+await waitFor(() => c.hidden && !a.hidden && !b.hidden, "switch back shows default tabs, hides Work tabs");
+assert(gBrowser.selectedTab === a, "returned to the tab that was active here");
+W.moveTab(b, ws.id);
+await waitFor(() => b.hidden, "tab moved to another workspace disappears from this one");
+gBrowser.selectedTab = c;  // external selection of a hidden workspace's tab
+await waitFor(() => W.active() === ws.id && !b.hidden && a.hidden, "selecting a tab of another workspace follows it");
+W.remove(ws.id);
+await waitFor(() => gBrowser.tabs.every(t => !t.hidden), "deleting a workspace keeps and reveals its tabs");
+assert(gBrowser.tabs.length === total + 2, "no tab was closed at any point");
+return "create/switch/move/delete workspaces: tabs only hidden and shown, never closed";

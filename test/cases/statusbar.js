@@ -1,0 +1,12 @@
+const bar = await waitFor(() => $("#vfx-statusbar"), "toolbar");
+const br = $("#browser");
+assert(bar.parentNode === br.parentNode && (br.compareDocumentPosition(bar) & 4), "placed after #browser, as its sibling");
+const r = bar.getBoundingClientRect();
+assert(r.height >= 18 && Math.abs(r.bottom - win.innerHeight) < 2, "at the bottom edge " + JSON.stringify([r.top, r.bottom, win.innerHeight]));
+const CUI = win.CustomizableUI;
+assert(CUI.areas.includes("vfx-statusbar"), "registered as CustomizableUI area");
+const before = CUI.getPlacementOfWidget("downloads-button")?.area;
+CUI.addWidgetToArea("downloads-button", "vfx-statusbar");
+await waitFor(() => bar.querySelector("#downloads-button"), "native button moved into status bar");
+if (before) CUI.addWidgetToArea("downloads-button", before); else CUI.removeWidgetFromArea("downloads-button");
+return "bottom toolbar present, accepts Firefox's own buttons";

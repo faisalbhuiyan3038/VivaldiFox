@@ -1,0 +1,16 @@
+/* L3 corner rounding. Direct rules on long-lived classes, so the feature does
+   not depend on Firefox's (still changing) design-token names. */
+:root[vfx-rounding] .tab-background,
+:root[vfx-rounding] .urlbar-background,
+:root[vfx-rounding] #urlbar,
+:root[vfx-rounding] #searchbar,
+:root[vfx-rounding] .toolbarbutton-1 > .toolbarbutton-icon,
+:root[vfx-rounding] .toolbarbutton-1 > .toolbarbutton-badge-stack,
+:root[vfx-rounding] .toolbarbutton-1 > .toolbarbutton-text,
+:root[vfx-rounding] .vfx-panel-btn,
+:root[vfx-rounding] #vfx-qc,
+:root[vfx-rounding] menupopup,
+:root[vfx-rounding] panel {
+  border-radius: var(--vfx-radius) !important;
+  --panel-border-radius: var(--vfx-radius);
+}

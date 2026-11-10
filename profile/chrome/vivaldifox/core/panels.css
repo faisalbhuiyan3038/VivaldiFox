@@ -1,0 +1,169 @@
+/* Panel host (shared infrastructure). Only styles the mod's own elements;
+   `order` places it at the outer edge of #browser without knowing its siblings. */
+#vfx-panels {
+  order: -1000;
+  position: relative;
+  background-color: var(--toolbar-bgcolor, Canvas);
+  color: var(--toolbar-color, CanvasText);
+  border-inline-end: 1px solid var(--chrome-content-separator-color, color-mix(in srgb, currentColor 20%, transparent));
+}
+#vfx-panels[side="right"] {
+  order: 1000;
+  flex-direction: row-reverse;
+  border-inline-end: 0;
+  border-inline-start: 1px solid var(--chrome-content-separator-color, color-mix(in srgb, currentColor 20%, transparent));
+}
+:root:is([inFullscreen], [inDOMFullscreen], [chromehidden~="extrachrome"], [customizing]) #vfx-panels {
+  display: none;
+}
+
+#vfx-panel-strip {
+  width: 36px;
+  padding-block: 4px;
+  align-items: center;
+  gap: 2px;
+}
+.vfx-panel-btn {
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border-radius: 6px;
+  justify-content: center;
+  -moz-context-properties: fill, fill-opacity, stroke;
+  fill: currentColor;
+}
+.vfx-panel-btn > .toolbarbutton-icon {
+  width: 16px;
+  height: 16px;
+}
+.vfx-panel-btn > .toolbarbutton-text {
+  display: none;
+}
+.vfx-panel-btn:hover {
+  background-color: color-mix(in srgb, currentColor 12%, transparent);
+}
+.vfx-panel-btn[checked] {
+  background-color: color-mix(in srgb, AccentColor 28%, transparent);
+}
+
+#vfx-panel-box {
+  min-width: 180px;
+  border-inline-start: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background-color: var(--toolbar-bgcolor, Canvas);
+}
+#vfx-panels[side="right"] > #vfx-panel-box {
+  border-inline-start: 0;
+  border-inline-end: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+#vfx-panel-header {
+  min-height: 30px;
+  padding-inline: 10px 4px;
+  font-weight: 600;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+#vfx-panel-title {
+  margin: 0;
+}
+.vfx-panel-hbtn {
+  appearance: none;
+  min-width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 4px;
+  -moz-context-properties: fill, fill-opacity, stroke;
+  fill: currentColor;
+}
+.vfx-panel-hbtn:hover {
+  background-color: color-mix(in srgb, currentColor 14%, transparent);
+}
+#vfx-panel-content,
+.vfx-panel {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Resize handle on the inner edge of the open panel. */
+#vfx-panel-grip {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -3px;
+  width: 6px;
+  z-index: 3;
+  cursor: ew-resize;
+}
+#vfx-panels[side="right"] > #vfx-panel-grip {
+  inset-inline: -3px auto;
+}
+/* During a resize drag, keep the pointer out of web content. */
+#vfx-panels[resizing] ~ * browser,
+#vfx-panels[resizing] browser,
+#browser:has(> #vfx-panels[resizing]) browser {
+  pointer-events: none;
+}
+
+/* Shared building blocks for panel UIs. */
+.vfx-p-toolbar {
+  padding: 6px;
+  gap: 4px;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+.vfx-p-input {
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 4px;
+  background: var(--toolbar-field-background-color, Field);
+  color: var(--toolbar-field-color, FieldText);
+  font: inherit;
+}
+.vfx-p-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.vfx-p-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 7%, transparent);
+  cursor: default;
+}
+.vfx-p-row:hover {
+  background-color: color-mix(in srgb, currentColor 8%, transparent);
+}
+.vfx-p-row[selected] {
+  background-color: color-mix(in srgb, AccentColor 22%, transparent);
+}
+.vfx-p-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.vfx-p-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vfx-p-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85em;
+  opacity: 0.6;
+}
+.vfx-p-empty {
+  padding: 16px;
+  opacity: 0.6;
+  text-align: center;
+}

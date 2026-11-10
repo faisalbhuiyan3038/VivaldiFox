@@ -1,0 +1,10 @@
+await waitFor(() => $("#vfx-break"), "widget");
+VivaldiFox.Commands.run("page.breakMode", win);
+const o = await waitFor(() => $("#vfx-break-overlay"), "overlay");
+const r = o.getBoundingClientRect();
+assert(r.width >= win.innerWidth - 1 && r.height >= win.innerHeight - 1, "overlay covers window");
+assert(win.vfxBreakMode.active, "active");
+o.click();
+await waitFor(() => !$("#vfx-break-overlay"), "overlay removed");
+assert(!win.vfxBreakMode.active, "inactive");
+return "overlay covers the window and click resumes";

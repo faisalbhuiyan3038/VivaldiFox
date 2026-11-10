@@ -1,0 +1,14 @@
+const btn = await waitFor(() => $("#vfx-trash"), "widget");
+const t = await openTab(page("<title>trash-me</title>x"));
+await sleep(300);
+gBrowser.removeTab(t, { animate: false });
+await sleep(500);
+const popup = btn.querySelector("menupopup");
+popup.openPopup(btn, "after_start");
+await waitFor(() => popup.state === "open", "popup open");
+const item = [...popup.children].find(c => c.label === "trash-me");
+assert(item, "closed tab listed: " + [...popup.children].map(c => c.label));
+const n = gBrowser.tabs.length;
+item.doCommand(); popup.hidePopup();
+await waitFor(() => gBrowser.tabs.length === n + 1, "tab restored");
+return "closed tab listed and restored from the trash menu";

@@ -1,0 +1,14 @@
+const tb = $("#navigator-toolbox");
+const t = await openTab(web("<title>red</title><meta name='theme-color' content='#d01020'>x"));
+gBrowser.selectedTab = t;
+await waitFor(() => doc.documentElement.hasAttribute("vfx-accent"), "accent applied from theme-color");
+const rgb = () => { const c = win.getComputedStyle(tb).backgroundColor, n = c.match(/[\d.]+/g).map(Number); return c.startsWith("color(") ? n.slice(0, 3).map(v => Math.round(v * 255)) : n.slice(0, 3); };
+await waitFor(() => { const [r, g, b] = rgb(); return r > 150 && g < 90 && b < 90; }, "tab bar is red-ish: " + rgb());
+assert(doc.documentElement.getAttribute("vfx-accent") === "dark", "dark accent -> light text");
+const svg = "data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><rect width='16' height='16' fill='#10c040'/></svg>");
+const t2 = await openTab(web("<title>green</title><link rel='icon' href=\"" + svg + "\">y"));
+gBrowser.selectedTab = t2;
+await waitFor(() => { const [r, g, b] = rgb(); return g > 120 && r < 110 && g > b; }, "falls back to favicon colour (green): " + rgb(), 10000);
+const t3 = await openTab("about:blank"); gBrowser.selectedTab = t3;
+await waitFor(() => !doc.documentElement.hasAttribute("vfx-accent"), "no colour on a page without one");
+return "theme-color (red) and favicon (green) both tint the tab bar; cleared on blank page";

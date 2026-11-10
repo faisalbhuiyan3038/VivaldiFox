@@ -1,0 +1,13 @@
+const t = await openTab(web("<title>R1</title>one")); gBrowser.selectedTab = t;
+t.linkedBrowser.loadURI(Services.io.newURI(web("<title>R2</title>two")), { triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal() });
+await waitFor(() => t.linkedBrowser.contentTitle === "R2", "second page");
+const br = t.linkedBrowser, r = br.getBoundingClientRect();
+mouse(br, "mousedown", { button: 2, buttons: 2, clientX: r.x + 50, clientY: r.y + 50 });
+mouse(br, "mousedown", { button: 0, buttons: 3, clientX: r.x + 50, clientY: r.y + 50 });
+assert(win.vfxRocker.last === "back", "right-hold + left-click -> back");
+await waitFor(() => t.linkedBrowser.contentTitle === "R1", "went back");
+mouse(br, "mouseup", { button: 0, buttons: 2 }); mouse(br, "mouseup", { button: 2, buttons: 0 });
+mouse(br, "mousedown", { button: 0, buttons: 1, clientX: r.x + 50, clientY: r.y + 50 });
+mouse(br, "mousedown", { button: 2, buttons: 3, clientX: r.x + 50, clientY: r.y + 50 });
+await waitFor(() => t.linkedBrowser.contentTitle === "R2", "left-hold + right-click -> forward");
+return "rocker back and forward both navigate";

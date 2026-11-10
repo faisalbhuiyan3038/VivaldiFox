@@ -1,0 +1,12 @@
+const btn = await waitFor(() => $("#vfx-menu-button"), "widget");
+assert(btn.closest("#TabsToolbar"), "placed in the tab bar by default");
+const bar = $("#main-menubar"); const count = bar.querySelectorAll(":scope > menu").length;
+assert(count >= 5, "menubar has menus: " + count);
+const popup = btn.querySelector("menupopup");
+popup.openPopup(btn, "after_start");
+await waitFor(() => popup.state === "open", "open");
+assert(popup.querySelectorAll(":scope > menu").length === count, "all menus shown in the button popup");
+assert(popup.querySelector("#file-menu, #menu_FilePopup, menu[id*='file' i]"), "File menu present");
+popup.hidePopup();
+await waitFor(() => bar.querySelectorAll(":scope > menu").length === count, "menus returned to the menu bar");
+return count + " native menus lent to the button popup and returned intact";

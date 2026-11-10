@@ -1,0 +1,29 @@
+/* L5 hide UI. Technique adapted from MrOtherGuy's autohide_toolbox.css
+   (firefox-csshacks, MPL-2.0): slide the toolbox out with a transform and pull
+   the content up with a negative margin, so nothing is removed from the DOM. */
+
+/* Full hide: everything goes; the shortcut (or command) brings it back. */
+:root[vfx-ui-hidden="full"] #navigator-toolbox,
+:root[vfx-ui-hidden] #vfx-statusbar,
+:root[vfx-ui-hidden] #vfx-panels {
+  display: none !important;
+}
+
+/* Hover reveal: a 4px strip stays at the top edge as the hot zone. */
+:root[vfx-ui-hidden="hover"] #navigator-toolbox {
+  position: relative;
+  z-index: 10;
+  margin-bottom: calc(4px - var(--vfx-toolbox-height, 80px));
+  transform: translateY(calc(4px - 100%));
+  opacity: 0;
+  transition: transform 0.16s ease-out, opacity 0.16s;
+}
+:root[vfx-ui-hidden="hover"] #navigator-toolbox:is(:hover, :focus-within),
+:root[vfx-ui-hidden="hover"][vfx-ui-popup] #navigator-toolbox,
+:root[vfx-ui-hidden="hover"][customizing] #navigator-toolbox {
+  transform: none;
+  opacity: 1;
+}
+:root[vfx-ui-hidden="hover"][customizing] #navigator-toolbox {
+  margin-bottom: 0;
+}

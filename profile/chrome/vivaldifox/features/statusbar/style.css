@@ -1,0 +1,30 @@
+/* S1 status bar. */
+#vfx-statusbar {
+  appearance: none;
+  order: 30;
+  flex: 0 0 auto;
+  min-height: 26px;
+  padding-inline: 4px;
+  border-top: 1px solid var(--chrome-content-separator-color, color-mix(in srgb, currentColor 20%, transparent));
+  background-color: var(--toolbar-bgcolor, Canvas);
+  color: var(--toolbar-color, CanvasText);
+  --toolbarbutton-inner-padding: 4px;
+}
+:root[vfx-statusbar="compact"] #vfx-statusbar {
+  min-height: 20px;
+  --toolbarbutton-inner-padding: 2px;
+  font-size: 0.9em;
+}
+#vfx-statusbar-target {
+  min-height: inherit;
+  align-items: center;
+}
+/* Hidden with the rest of the chrome in fullscreen, popups and DOM fullscreen. */
+:root:is([inFullscreen], [inDOMFullscreen], [chromehidden~="toolbar"]) #vfx-statusbar:not([customizing]) {
+  display: none;
+}
+/* Keep an empty bar a usable drop target while customizing. */
+:root[customizing] #vfx-statusbar-target {
+  min-width: 100px;
+  min-height: 28px;
+}

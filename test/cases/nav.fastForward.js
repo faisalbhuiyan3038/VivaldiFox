@@ -1,0 +1,13 @@
+assert(await waitFor(() => $("#vfx-rewind") && $("#vfx-fastforward"), "widgets"), "widgets");
+const p2 = web("<title>P2</title>two");
+const t = await openTab(web("<title>P1</title><a rel='next' href=\"" + p2 + "\">weiter</a>"));
+gBrowser.selectedTab = t;
+const href = await win.vfxFastForward.fastForward();
+assert(href === p2, "rel=next found via content script: " + href);
+await waitFor(() => t.linkedBrowser.contentTitle === "P2", "navigated to next page");
+assert(win.vfxFastForward.guessNextUrl("https://example.com/list?page=3") === "https://example.com/list?page=4", "page param");
+assert(win.vfxFastForward.guessNextUrl("https://example.com/comic/007.html") === "https://example.com/comic/008.html", "path number");
+assert(win.vfxFastForward.guessNextUrl("https://example.com/about") === null, "no guess");
+assert(win.vfxFastForward.rewind() === true, "rewind");
+await waitFor(() => t.linkedBrowser.contentTitle === "P1", "rewound to first page");
+return "rel=next followed (content bridge works), URL guessing correct, rewind returned to first page";

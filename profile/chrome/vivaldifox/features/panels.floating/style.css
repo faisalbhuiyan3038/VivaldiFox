@@ -1,0 +1,22 @@
+/* P6: floating panel. The open panel overlays the page instead of pushing it
+   aside. Pure CSS; it only modifies the mod's own panel host, so it has no
+   effect (and no cost) when no panel feature is enabled. */
+/* The host must form a stacking context above the page area, otherwise the
+   (later, composited) tab content paints over the overlaying panel. */
+#vfx-panels {
+  z-index: 3;
+}
+#vfx-panels > #vfx-panel-box {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 36px; /* width of the icon strip */
+  z-index: 2;
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.28);
+}
+#vfx-panels[side="right"] > #vfx-panel-box {
+  inset-inline: auto 36px;
+  box-shadow: -4px 0 18px rgba(0, 0, 0, 0.28);
+}
+#vfx-panels > #vfx-panel-grip {
+  display: none;
+}

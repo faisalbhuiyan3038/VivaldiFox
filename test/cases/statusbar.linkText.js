@@ -1,0 +1,13 @@
+const CUI = win.CustomizableUI;
+await waitFor(() => CUI.getWidget("vfx-status-text"), "widget registered");
+if (!st("statusbar").running) assert(!doc.documentElement.hasAttribute("vfx-status-text-placed"), "not placed by default without status bar -> native overlay untouched");
+CUI.addWidgetToArea("vfx-status-text", CUI.AREA_NAVBAR);
+const node = await waitFor(() => $("#nav-bar #vfx-status-text"), "placed in nav bar");
+await waitFor(() => doc.documentElement.hasAttribute("vfx-status-text-placed"), "root flagged");
+win.XULBrowserWindow.setOverLink("https://example.com/hovered");
+await waitFor(() => node.querySelector("label").getAttribute("value").includes("example.com/hovered"), "link text mirrored");
+assert(win.getComputedStyle($("#statuspanel")).visibility === "hidden", "native overlay hidden while placed");
+win.XULBrowserWindow.setOverLink("");
+CUI.removeWidgetFromArea("vfx-status-text");
+await waitFor(() => !doc.documentElement.hasAttribute("vfx-status-text-placed"), "flag cleared when removed");
+return "hover text mirrored into the toolbar item; native overlay restored when item is removed";

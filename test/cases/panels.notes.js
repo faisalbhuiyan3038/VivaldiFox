@@ -1,0 +1,36 @@
+const P = VivaldiFox.Panels;
+assert($("#vfx-panels") && $('.vfx-panel-btn[data-panel="notes"]'), "panel host + notes button present");
+assert($("#vfx-panels").parentNode.id === "browser", "host lives in #browser");
+const tabbox = $("#tabbrowser-tabbox"); const w0 = tabbox.getBoundingClientRect().width;
+$('.vfx-panel-btn[data-panel="notes"]').doCommand();
+const node = await waitFor(() => $('.vfx-panel[data-panel="notes"]'), "notes panel built");
+assert(P.current(win) === "notes", "open");
+if (st("panels.floating").running) assert(Math.abs(tabbox.getBoundingClientRect().width - w0) < 2, "floating mode: page width unchanged");
+else await waitFor(() => tabbox.getBoundingClientRect().width < w0 - 150, "page area narrowed by the panel");
+const { Notes } = win.vfxNotes;
+const before = (await Notes.all()).length;
+const n = await Notes.add({ text: "# Hello\n\nSome **bold** text and a [link](https://example.com)" });
+await waitFor(() => node.querySelector('.vfx-p-row[data-id="' + n.id + '"]'), "note listed");
+assert(node.querySelector('.vfx-p-row[data-id="' + n.id + '"] .vfx-p-title').textContent === "Hello", "title derived from first line");
+await node.vfxNotes.select(n.id);
+const ed = node.querySelector("textarea");
+assert(ed.value.startsWith("# Hello"), "editor shows note");
+ed.value = "# Hello\n\nedited"; ed.dispatchEvent(new win.Event("input", { bubbles: true }));
+await waitFor(async () => (await Notes.all()).find(x => x.id === n.id)?.text.endsWith("edited"), "edit saved");
+const { renderMarkdown } = ChromeUtils.importESModule("chrome://vivaldifox/content/features/panels.notes/notes.sys.mjs");
+const md = renderMarkdown(doc, "# T\n- a\n- b\n\n**x** <img src=x onerror=alert(1)>");
+assert(md.querySelector("h2") && md.querySelectorAll("li").length === 2 && md.querySelector("strong") && !md.querySelector("img"), "markdown rendered as DOM, raw HTML stays text");
+// persisted to disk
+await sleep(700);
+const disk = await IOUtils.readJSON(PathUtils.join(PathUtils.profileDir, "vivaldifox-data", "notes.json"));
+assert(disk.notes.some(x => x.id === n.id), "written to vivaldifox-data/notes.json");
+// selection -> note
+assert($("#vfx-note-selection"), "context menu item");
+win.gContextMenu = { isTextSelected: true, selectionInfo: { fullText: "picked text" } };
+const sn = await win.vfxNotes.addSelection(); win.gContextMenu = null;
+assert(sn.text === "picked text", "selection saved as note");
+await Notes.remove(n.id); await Notes.remove(sn.id);
+assert((await Notes.all()).length === before, "notes removed");
+P.close(win);
+assert($("#vfx-panel-box").hidden, "panel closed");
+return "panel opens beside the page; notes add/edit/persist/delete; markdown safe; selection -> note";

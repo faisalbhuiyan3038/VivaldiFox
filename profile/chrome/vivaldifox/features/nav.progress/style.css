@@ -1,0 +1,16 @@
+/* A4: progress fill behind the address text. `.urlbar-background` is the
+   long-lived backdrop element of the address field. */
+#urlbar[vfx-loading] > .urlbar-background {
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, AccentColor 30%, transparent) var(--vfx-progress, 0%),
+    transparent var(--vfx-progress, 0%)
+  ) !important;
+  transition: background-image 0.2s;
+}
+#urlbar[vfx-loading="done"] > .urlbar-background {
+  background-image: linear-gradient(to right, color-mix(in srgb, AccentColor 12%, transparent) 100%, transparent 100%) !important;
+}
+#urlbar:-moz-locale-dir(rtl)[vfx-loading] > .urlbar-background {
+  transform: scaleX(-1);
+}

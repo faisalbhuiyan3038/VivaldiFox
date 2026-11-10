@@ -1,0 +1,8 @@
+/* T6 workspaces button: icon plus the workspace name. */
+#vfx-workspaces.vfx-labelled > .toolbarbutton-text {
+  display: flex !important;
+  margin-inline-start: 6px;
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

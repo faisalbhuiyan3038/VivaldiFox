@@ -1,0 +1,23 @@
+const bar = $("#nav-bar"), br = $("#browser");
+assert(bar.parentNode === br.parentNode, "nav bar moved out of the toolbox");
+// Other bottom bars (tab bar, status bar) may legitimately sit below it.
+const below = ["#TabsToolbar", "#vfx-stack-row", "#vfx-statusbar"].map(s => $(s)).filter(e => e && e.parentNode === br.parentNode && e.getBoundingClientRect().height > 0).reduce((h, e) => h + e.getBoundingClientRect().height, 0);
+await waitFor(() => bar.getBoundingClientRect().top >= br.getBoundingClientRect().bottom - 1 && Math.abs(bar.getBoundingClientRect().bottom + below - win.innerHeight) < 4, "rendered at the bottom: " + bar.getBoundingClientRect().bottom + "+" + below + " vs " + win.innerHeight);
+assert(bar.getBoundingClientRect().height < 80 && br.getBoundingClientRect().height > win.innerHeight * 0.5, "bar keeps its normal height: " + bar.getBoundingClientRect().height);
+const t = await openTab(web("<title>navbottom</title>n")); gBrowser.selectedTab = t;
+assert(win.gURLBar.value.includes("127.0.0.1"), "address bar still tracks the page");
+await sleep(600);
+win.gURLBar.focus(); win.gURLBar.search("exa");
+await waitFor(() => win.gURLBar.view.isOpen, "results open", 15000);
+await sleep(400);
+const view = $("#urlbar .urlbarView").getBoundingClientRect(), input = $("#urlbar .urlbar-input-container").getBoundingClientRect();
+assert(view.height > 10, "results visible");
+assert(view.bottom <= input.top + 3, "results open upwards: view.bottom " + view.bottom + " input.top " + input.top);
+assert(view.top >= 0 && input.bottom <= win.innerHeight + 1, "nothing clipped off-screen");
+if (!st("nav.bottom").enabled) return "n/a";
+win.gURLBar.view.close(); win.gURLBar.blur();
+Services.prefs.setBoolPref("vivaldifox.nav.bottom.enabled", false);
+await sleep(300);
+assert(bar.parentNode.id === "navigator-toolbox", "returned to the toolbox on disable");
+assert(bar.previousElementSibling?.id === "TabsToolbar" || $("#TabsToolbar").parentNode.id !== "navigator-toolbox", "in its original slot");
+return "nav bar at the bottom; results list opens upwards and stays on screen";

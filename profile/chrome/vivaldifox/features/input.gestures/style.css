@@ -1,0 +1,10 @@
+/* I1 gesture trail overlay. */
+#vfx-gesture-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483645;
+  pointer-events: none;
+}
+:root {
+  --vfx-gesture-color: AccentColor;
+}

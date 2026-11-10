@@ -1,0 +1,11 @@
+await waitFor(() => $("#vfx-tile"), "widget");
+assert($("#vfx-tile-tab"), "tab menu item");
+const a = await openTab(web("<title>TA</title>a")); const b = await openTab(web("<title>TB</title>b"));
+gBrowser.selectedTab = a;
+VivaldiFox.Commands.run("tabs.tile", win);
+await waitFor(() => a.splitview && a.splitview === b.splitview, "both tabs share a split view");
+const pa = a.linkedBrowser.getBoundingClientRect(), pb = b.linkedBrowser.getBoundingClientRect();
+await waitFor(() => { const x = a.linkedBrowser.getBoundingClientRect(), y = b.linkedBrowser.getBoundingClientRect(); return x.width > 100 && y.width > 100 && Math.abs(x.top - y.top) < 4 && y.left >= x.right - 4; }, "both pages visible side by side");
+VivaldiFox.Commands.run("tabs.untile", win);
+await waitFor(() => !a.splitview && !b.splitview, "untiled");
+return "two tabs tiled side by side via native Split View, then untiled";

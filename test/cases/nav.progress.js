@@ -1,0 +1,12 @@
+const urlbar = $("#urlbar");
+assert(urlbar.querySelector(".urlbar-background"), ".urlbar-background still exists");
+let seen = false;
+const mo = new win.MutationObserver(() => { if (urlbar.hasAttribute("vfx-loading")) seen = true; });
+mo.observe(urlbar, { attributes: true });
+const t = gBrowser.selectedTab = gBrowser.addTab("about:blank", { triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal() });
+await sleep(200);
+t.linkedBrowser.loadURI(Services.io.newURI(page("<title>prog</title>" + "x".repeat(5000))), { triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal() });
+await waitFor(() => seen, "progress attribute appeared");
+await waitFor(() => !urlbar.hasAttribute("vfx-loading"), "progress cleared after load");
+mo.disconnect();
+return "progress shown during load and cleared afterwards";

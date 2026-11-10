@@ -1,0 +1,17 @@
+await waitFor(() => $("#vfx-capture"), "widget");
+const dir = PathUtils.join(PathUtils.tempDir, "vfx-capture-test-" + Date.now());
+VivaldiFox.setOpt("capture", "folder", dir);
+const t = await openTab(page("<title>cap</title><body style='margin:0;background:rgb(0,128,0)'><div style='height:3000px'>tall</div>")); gBrowser.selectedTab = t;
+await sleep(300);
+const full = await win.vfxCapture.toFile(true);
+const vis = await win.vfxCapture.toFile(false);
+const dims = async p => { const b = await IOUtils.read(p); assert(b[0] === 0x89 && b[1] === 0x50, "png signature"); const v = new DataView(b.buffer); return [v.getUint32(16), v.getUint32(20)]; };
+const fd = await dims(full), vd = await dims(vis);
+assert(fd[1] >= 3000 * (win.devicePixelRatio) * 0.9, "full page height captured " + fd);
+assert(vd[1] < fd[1], "visible smaller than full " + vd);
+const clip = await win.vfxCapture.toClipboard(false);
+assert(Services.clipboard.hasDataMatchingFlavors(["image/png"], Ci.nsIClipboard.kGlobalClipboard), "image on clipboard");
+await IOUtils.remove(dir, { recursive: true });
+Services.prefs.clearUserPref("vivaldifox.capture.folder");
+$("#vfx-toast")?.remove();
+return "full page " + fd.join("x") + ", visible " + vd.join("x") + " written as PNG; clipboard has image";

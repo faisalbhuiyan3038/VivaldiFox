@@ -1,0 +1,35 @@
+/* A5 navigation bar at the bottom. */
+:root[vfx-nav-bottom] #nav-bar {
+  order: 10;
+  flex: 0 0 auto !important;
+  border-top: 1px solid var(--chrome-content-separator-color, color-mix(in srgb, currentColor 20%, transparent));
+}
+:root[vfx-nav-bottom]:is([inFullscreen], [inDOMFullscreen]) #nav-bar {
+  display: none;
+}
+/* Open the results upwards.
+   Current Firefox (anchor-positioned results): the list is `position: fixed`
+   and anchored to the input; flip it to the block-start side of that anchor. */
+:root[vfx-nav-bottom] #urlbar > .urlbarView {
+  /* Firefox places it with `position-area: end center` (below the input). */
+  position-area: start center !important;
+  margin-block: 0 !important;
+  flex-direction: column-reverse !important;
+}
+/* Most relevant result nearest the input. */
+:root[vfx-nav-bottom] #urlbar > .urlbarView .urlbarView-results {
+  display: flex;
+  flex-direction: column-reverse;
+}
+/* The field's backdrop normally grows downwards while open: keep it on the input. */
+:root[vfx-nav-bottom] #urlbar[open] > .urlbar-background {
+  inset-block: -4px !important;
+}
+/* Older Firefox ("breakout" address bar): anchor the expanded field to its
+   bottom edge and stack the results above the input. */
+:root[vfx-nav-bottom] #urlbar[breakout][breakout-extend] {
+  top: auto !important;
+  bottom: 0 !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+}

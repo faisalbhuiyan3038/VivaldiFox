@@ -1,0 +1,17 @@
+/* L4 window background image. The image sits on the toolbox; toolbars above
+   it become translucent so it shows through behind tabs and buttons. */
+:root[vfx-window-bg] #navigator-toolbox {
+  background-image: var(--vfx-window-bg) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+:root[vfx-window-bg] #nav-bar,
+:root[vfx-window-bg] #PersonalToolbar,
+:root[vfx-window-bg] #toolbar-menubar {
+  background-color: color-mix(in srgb, var(--toolbar-bgcolor, Canvas) var(--vfx-toolbar-opacity, 60%), transparent) !important;
+  background-image: none !important;
+}
+:root[vfx-window-bg] #TabsToolbar {
+  background-color: color-mix(in srgb, var(--toolbox-bgcolor, Canvas) calc(var(--vfx-toolbar-opacity, 60%) / 2), transparent) !important;
+}

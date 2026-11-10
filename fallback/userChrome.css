@@ -1,0 +1,60 @@
+/* VivaldiFox CSS-only fallback (MPL-2.0).
+ *
+ * For use WITHOUT the JavaScript loader: either because you do not want
+ * privileged code, or because a future Firefox has broken the loader and you
+ * are waiting for a fix. It covers the subset of features that are possible
+ * in pure CSS, each still independently toggleable through the same
+ * about:config prefs (create them as booleans; see fallback/user.js).
+ *
+ * Requires toolkit.legacyUserProfileCustomizations.stylesheets = true.
+ *
+ * Every rule is guarded by :root:not([vivaldifox]): the loader marks the
+ * window with that attribute, so if both are installed the loader's full
+ * implementation takes over and nothing here applies twice.
+ */
+
+/* ── tabs.appearance: close button only on hover ─────────────────────── */
+@media -moz-pref("vivaldifox.tabs.appearance.enabled") {
+  :root:not([vivaldifox]) .tabbrowser-tab:not([pinned]) .tab-close-button {
+    display: none !important;
+  }
+  :root:not([vivaldifox]) .tabbrowser-tab:not([pinned]):hover .tab-close-button {
+    display: flex !important;
+  }
+}
+
+/* ── look.rounding: one corner radius (edit the value below) ─────────── */
+@media -moz-pref("vivaldifox.look.rounding.enabled") {
+  :root:not([vivaldifox]) {
+    --vfx-radius: 10px;
+  }
+  :root:not([vivaldifox]) :is(.tab-background, .urlbar-background, #urlbar, #searchbar, menupopup, panel),
+  :root:not([vivaldifox]) .toolbarbutton-1 > :is(.toolbarbutton-icon, .toolbarbutton-badge-stack, .toolbarbutton-text) {
+    border-radius: var(--vfx-radius) !important;
+  }
+}
+
+/* ── look.autohide: toolbars slide away, return on hover/focus ───────────
+   Technique adapted from MrOtherGuy's autohide_toolbox.css (MPL-2.0).
+   Without JavaScript the toolbox height is not measured, hence the fixed
+   --vfx-toolbox-height: adjust it if you use the bookmarks toolbar. */
+@media -moz-pref("vivaldifox.look.autohide.enabled") {
+  :root:not([vivaldifox]) {
+    --vfx-toolbox-height: 84px;
+  }
+  :root:not([vivaldifox], [customizing]) #navigator-toolbox {
+    position: relative;
+    z-index: 10;
+    margin-bottom: calc(4px - var(--vfx-toolbox-height));
+    transform: translateY(calc(4px - 100%));
+    opacity: 0;
+    transition: transform 0.16s ease-out, opacity 0.16s;
+  }
+  :root:not([vivaldifox], [customizing]) #navigator-toolbox:is(:hover, :focus-within) {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ── nav.progress: no CSS-only equivalent (needs load events) ────────── */
+/* ── everything else needs the loader; see README "CSS-only mode" ────── */

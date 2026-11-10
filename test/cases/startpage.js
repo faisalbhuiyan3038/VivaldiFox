@@ -1,0 +1,34 @@
+const URL_ = "chrome://vivaldifox/content/features/startpage/page.html";
+assert(win.AboutNewTab.newTabURL === URL_, "new tab URL overridden");
+assert(Services.prefs.getStringPref("browser.startup.homepage") === URL_ && !Services.prefs.prefHasUserValue("browser.startup.homepage"), "home page on default branch only");
+const n = gBrowser.tabs.length;
+VivaldiFox.Commands.run("newTab", win);
+await waitFor(() => gBrowser.tabs.length === n + 1, "new tab");
+const t = gBrowser.selectedTab;
+await waitFor(() => t.linkedBrowser.currentURI.spec === URL_, "start page loaded in new tab");
+const d = () => t.linkedBrowser.contentDocument;
+await waitFor(() => d()?.documentElement.getAttribute("data-ready") === "dial", "dial rendered");
+assert(win.gURLBar.value === "", "address bar stays empty on the start page: " + win.gURLBar.value);
+assert(d().querySelector(".tile.add"), "add tile");
+// Speed Dial comes from a bookmarks folder; subfolders are groups.
+const B = win.PlacesUtils.bookmarks;
+const folder = await B.insert({ parentGuid: B.menuGuid, type: B.TYPE_FOLDER, title: "Speed Dial" });
+await B.insert({ parentGuid: folder.guid, url: "https://example.org/", title: "Example Org" });
+const grp = await B.insert({ parentGuid: folder.guid, type: B.TYPE_FOLDER, title: "Work" });
+await B.insert({ parentGuid: grp.guid, url: "https://example.net/", title: "Example Net" });
+await waitFor(() => d().querySelector('.tile[data-url="https://example.org/"]'), "bookmark appears as tile (live refresh)");
+const tabs = [...d().querySelectorAll("#groups button")].map(b => b.textContent);
+assert(tabs.includes("Work"), "subfolder shown as group: " + tabs);
+[...d().querySelectorAll("#groups button")].find(b => b.textContent === "Work").click();
+await waitFor(() => d().querySelector('.tile[data-url="https://example.net/"]'), "group switch shows its tiles");
+await t.linkedBrowser.contentWindow.vfxStartPage.show("bookmarks");
+assert(d().querySelectorAll(".list .row").length === 3, "bookmark roots listed");
+await t.linkedBrowser.contentWindow.vfxStartPage.show("history");
+assert(d().querySelector(".list"), "history list");
+// Optional bridge: the Notes section exists exactly when the notes feature runs.
+assert([...d().querySelectorAll("#nav button")].some(b => b.textContent === "Notes") === st("panels.notes").running, "Notes section present iff the notes feature is on");
+await B.remove(folder.guid);
+Services.prefs.setBoolPref("vivaldifox.startpage.enabled", false);
+await sleep(300);
+assert(win.AboutNewTab.newTabURL !== URL_, "new tab URL restored on disable: " + win.AboutNewTab.newTabURL);
+return "new tab + home overridden; tiles from 'Speed Dial' bookmarks with groups; bookmarks/history sections; restored on disable";

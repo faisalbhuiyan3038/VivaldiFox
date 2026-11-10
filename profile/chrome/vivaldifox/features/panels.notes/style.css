@@ -1,0 +1,62 @@
+/* P2 notes panel. */
+.vfx-notes-list {
+  flex: 0 1 38%;
+  min-height: 80px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+}
+.vfx-notes-editor,
+.vfx-notes-view {
+  flex: 1 1 0;
+  min-height: 80px;
+  margin: 0;
+  padding: 10px;
+  border: 0;
+  outline: none;
+  overflow-y: auto;
+  background: var(--toolbar-field-background-color, Field);
+  color: var(--toolbar-field-color, FieldText);
+  font: inherit;
+  line-height: 1.45;
+}
+.vfx-notes-editor {
+  resize: none;
+  appearance: none;
+}
+.vfx-notes-meta {
+  padding: 2px 10px;
+  font-size: 0.85em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vfx-notes-meta:empty {
+  display: none;
+}
+.vfx-note-link {
+  color: var(--link-color, LinkText);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.vfx-note-md :is(h2, h3, h4, h5) {
+  margin: 0.6em 0 0.3em;
+}
+.vfx-note-md p,
+.vfx-note-md ul,
+.vfx-note-md ol {
+  margin: 0.35em 0;
+}
+.vfx-note-md pre,
+.vfx-note-md code {
+  font-family: monospace;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  border-radius: 3px;
+}
+.vfx-note-md pre {
+  padding: 8px;
+  overflow-x: auto;
+}
+.vfx-note-image {
+  max-width: 100%;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}

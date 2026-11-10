@@ -1,0 +1,17 @@
+const bar = $("#TabsToolbar"), br = $("#browser");
+assert(bar.parentNode === br.parentNode && (br.compareDocumentPosition(bar) & 4), "tab bar moved below #browser");
+await waitFor(() => bar.getBoundingClientRect().top >= br.getBoundingClientRect().bottom - 1, "rendered under the page");
+const sb = $("#vfx-statusbar"), row = $("#vfx-stack-row");
+const under = [sb, row].filter(e => e && e.getBoundingClientRect().height > 0 && e.parentNode === br.parentNode).reduce((h, e) => h + e.getBoundingClientRect().height, 0);
+assert(Math.abs(bar.getBoundingClientRect().bottom + under - win.innerHeight) < 4, "at the bottom edge (above the status bar / stack row when those are on)");
+assert(bar.getBoundingClientRect().height < 80 && br.getBoundingClientRect().height > win.innerHeight * 0.5, "tab bar keeps its normal height; page keeps the space: " + bar.getBoundingClientRect().height + "/" + br.getBoundingClientRect().height);
+assert(win.getComputedStyle($("#nav-bar > .titlebar-buttonbox-container")).display !== "none", "window controls now in the nav bar");
+assert(win.getComputedStyle($("#TabsToolbar > .titlebar-buttonbox-container")).display === "none", "controls hidden in the tab bar");
+const n = gBrowser.tabs.length; const t = await openTab(web("<title>bottom</title>b")); gBrowser.selectedTab = t;
+assert(gBrowser.tabs.length === n + 1 && t.getBoundingClientRect().width > 20 && t.selected, "tabs still work after the move");
+assert(win.CustomizableUI.getPlacementOfWidget("tabbrowser-tabs")?.area === "TabsToolbar", "still a registered toolbar");
+Services.prefs.setBoolPref("vivaldifox.tabs.position.enabled", false);
+await sleep(300);
+const next = bar.nextElementSibling?.id;
+assert(bar.parentNode.id === "navigator-toolbox" && (next === "nav-bar" || next === "vfx-stack-row" || $("#nav-bar").parentNode.id !== "navigator-toolbox"), "returned to its original place on disable: next=" + next);
+return "tab bar under the page, window controls moved to nav bar, tabs functional, restored on disable";

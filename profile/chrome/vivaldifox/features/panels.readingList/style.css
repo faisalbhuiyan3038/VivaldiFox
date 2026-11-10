@@ -1,0 +1,15 @@
+/* P5 reading list panel. */
+.vfx-rl-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.vfx-rl-row {
+  cursor: pointer;
+}
+.vfx-rl-row[vfx-read] .vfx-p-title {
+  opacity: 0.55;
+}
+.vfx-rl-row:not([vfx-read]) .vfx-p-title {
+  font-weight: 600;
+}

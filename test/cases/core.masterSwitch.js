@@ -1,0 +1,11 @@
+if (VivaldiFox.status().some(s => s.running)) return "skipped in all-on mode";
+const ids = ["tabs.trash", "statusbar", "nav.qr"];
+for (const id of ids) Services.prefs.setBoolPref("vivaldifox." + id + ".enabled", true);
+await waitFor(() => $("#vfx-trash") && $("#vfx-statusbar") && $("#vfx-qr"), "three features running");
+Services.prefs.setBoolPref("vivaldifox.enabled", false);
+await waitFor(() => !$("#vfx-trash") && !$("#vfx-statusbar") && !$("#vfx-qr") && !VivaldiFox.status().some(s => s.running), "master off stops all features");
+assert(ids.every(id => Services.prefs.getBoolPref("vivaldifox." + id + ".enabled")), "individual choices are kept");
+Services.prefs.clearUserPref("vivaldifox.enabled");
+await waitFor(() => $("#vfx-trash") && $("#vfx-statusbar") && $("#vfx-qr"), "master on restores exactly the chosen features");
+assert(VivaldiFox.status().filter(s => s.running).length === 3, "nothing else was started");
+return "master switch stops and restores the selected features without touching their own prefs";

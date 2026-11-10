@@ -1,0 +1,5 @@
+/* T10: small marker on tabs that reload periodically. */
+.tabbrowser-tab[vfx-periodic-reload] .tab-label::before {
+  content: "⟳ ";
+  opacity: 0.7;
+}

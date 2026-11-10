@@ -1,0 +1,26 @@
+const row = await waitFor(() => $("#vfx-stack-row"), "second row element");
+assert(row.previousElementSibling?.id === "TabsToolbar", "directly under the tab bar");
+assert(row.hidden, "hidden while the active tab is not in a stack");
+const t1 = await openTab(web("<title>One</title>1")), t2 = await openTab(web("<title>Two</title>2")), t3 = await openTab(web("<title>Three</title>3"));
+const group = gBrowser.addTabGroup([t1, t2], { label: "Stack", color: "purple" });
+gBrowser.selectedTab = t1;
+await waitFor(() => !row.hidden && row.querySelectorAll(".vfx-stack-tab").length === 2, "row lists the stack's tabs");
+assert(row.querySelector(".vfx-stack-name").getAttribute("value") === "Stack", "stack name shown");
+await waitFor(() => group.collapsed, "stack kept folded in the main bar");
+const items = row.querySelectorAll(".vfx-stack-tab");
+assert(items[0].hasAttribute("selected") && !items[1].hasAttribute("selected"), "active tab highlighted");
+assert(row.getBoundingClientRect().height > 20 && row.getBoundingClientRect().top >= $("#TabsToolbar").getBoundingClientRect().bottom - 1, "rendered as a second level");
+items[1].dispatchEvent(new win.MouseEvent("click", { bubbles: true, button: 0, view: win }));
+await waitFor(() => gBrowser.selectedTab === t2, "clicking a second-row tab switches to it");
+await waitFor(() => row.querySelectorAll(".vfx-stack-tab")[1]?.hasAttribute("selected") && group.collapsed, "highlight follows; stack still folded");
+assert(t2.getBoundingClientRect().width > 10, "active stack tab stays visible in the main bar");
+gBrowser.selectedTab = t3;
+await waitFor(() => row.hidden, "row hides for an unstacked tab");
+// level 1: clicking the stack label activates the stack rather than unfolding it
+const label = group.querySelector(".tab-group-label") || group.labelElement;
+label.dispatchEvent(new win.MouseEvent("click", { bubbles: true, cancelable: true, button: 0, view: win }));
+await waitFor(() => gBrowser.selectedTab === t2 && !row.hidden, "label click returns to the stack's last tab");
+row.querySelector(".vfx-stack-add").doCommand();
+await waitFor(() => group.tabs.length === 3 && gBrowser.selectedTab.group === group, "+ adds a new tab to the stack");
+await waitFor(() => row.querySelectorAll(".vfx-stack-tab").length === 3, "row updated");
+return "second row lists/switches/extends the active stack; stacks stay folded; label click activates";

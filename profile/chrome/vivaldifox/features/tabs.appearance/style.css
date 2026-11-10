@@ -1,0 +1,37 @@
+/* T16 tab appearance. Selectors are limited to long-lived tab classes/attributes. */
+
+/* Close button only while hovering the tab. */
+:root[vfx-tab-close="hover"] .tabbrowser-tab:not([pinned]) .tab-close-button {
+  display: none !important;
+}
+:root[vfx-tab-close="hover"] .tabbrowser-tab:not([pinned]):hover .tab-close-button {
+  display: flex !important;
+}
+/* No close buttons at all (middle-click / shortcut users). */
+:root[vfx-tab-close="hidden"] .tabbrowser-tab .tab-close-button {
+  display: none !important;
+}
+/* Close button on the left, like Vivaldi's "left" option. */
+:root[vfx-tab-close="left"] .tabbrowser-tab:not([pinned]) .tab-close-button {
+  order: -1;
+  margin-inline: -2px 4px !important;
+}
+
+/* Unread dot: background tabs that changed since they were last selected. */
+:root[vfx-tab-unread] .tabbrowser-tab[vfx-unread] .tab-icon-stack::after {
+  content: "";
+  grid-area: 1 / 1;
+  place-self: start end;
+  width: 7px;
+  height: 7px;
+  margin: -2px;
+  border-radius: 50%;
+  background: AccentColor;
+}
+:root[vfx-tab-unread] .tabbrowser-tab[vfx-unread] .tab-label {
+  font-style: italic;
+}
+
+:root[vfx-tab-bold] .tabbrowser-tab:is([selected], [visuallyselected]) .tab-label {
+  font-weight: 600;
+}

@@ -1,0 +1,10 @@
+/* P1 web panels. */
+.vfx-webpanel-browser {
+  min-width: 0;
+  min-height: 0;
+  background-color: Canvas;
+}
+/* Favicon buttons are real images: do not tint them like the monochrome icons. */
+.vfx-panel-btn[data-panel^="web:"]:not([data-panel="web:add"]) {
+  -moz-context-properties: none;
+}

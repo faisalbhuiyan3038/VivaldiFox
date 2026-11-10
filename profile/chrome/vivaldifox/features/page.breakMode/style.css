@@ -1,0 +1,23 @@
+/* A6 break overlay. Fixed to the root so it does not depend on browser layout. */
+#vfx-break-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: color-mix(in srgb, Canvas 96%, AccentColor);
+  color: CanvasText;
+  cursor: pointer;
+  -moz-window-dragging: no-drag;
+}
+#vfx-break-overlay > .vfx-break-title {
+  font-size: 2.2em;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+#vfx-break-overlay > .vfx-break-hint {
+  opacity: 0.65;
+}

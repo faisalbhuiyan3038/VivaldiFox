@@ -1,0 +1,25 @@
+/* VivaldiFox core sheet: always loaded, styles only the mod's own elements. */
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+.vfx-widget .toolbarbutton-icon {
+  -moz-context-properties: fill, fill-opacity, stroke;
+  fill: currentColor;
+}
+
+#vfx-toast {
+  position: fixed;
+  inset-block-end: 48px;
+  inset-inline: 0;
+  width: fit-content;
+  max-width: 70vw;
+  margin-inline: auto;
+  z-index: 2147483646;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, CanvasText 88%, Canvas);
+  color: Canvas;
+  font-size: 0.95em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}

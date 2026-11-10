@@ -1,0 +1,16 @@
+const btn = await waitFor(() => $("#vfx-qr"), "widget");
+const t = await openTab(page("<title>qr</title>x")); gBrowser.selectedTab = t;
+VivaldiFox.Commands.run("nav.qr", win);
+const panel = await waitFor(() => $("#vfx-qr-panel")?.state === "open" && $("#vfx-qr-panel"), "panel open");
+const c = $("#vfx-qr-canvas");
+assert(c && c.width > 100, "canvas drawn " + c?.width);
+const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+let dark = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 128) dark++;
+const ratio = dark / (d.length / 4);
+assert(ratio > 0.15 && ratio < 0.6, "plausible module density " + ratio.toFixed(2));
+const { encode } = ChromeUtils.importESModule("chrome://vivaldifox/content/features/nav.qr/main.sys.mjs");
+const m = encode("HELLO");
+assert(m.length === 21 && m[0][0] && m[0][6] && m[6][0] && !m[7][7], "version-1 matrix with finder pattern");
+panel.hidePopup();
+await waitFor(() => !$("#vfx-qr-panel"), "panel removed");
+return "QR panel rendered (" + c.width + "px), finder pattern present";

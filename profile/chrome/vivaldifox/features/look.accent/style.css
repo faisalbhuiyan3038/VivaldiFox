@@ -1,0 +1,14 @@
+/* L1 accent colour. Painted on the toolbox background (the area behind the
+   tab strip); the navigation bar keeps the theme's own colour, as in Vivaldi. */
+:root[vfx-accent] #navigator-toolbox {
+  background-color: color-mix(in srgb, var(--vfx-accent) var(--vfx-accent-strength, 100%), var(--toolbox-bgcolor, Canvas)) !important;
+  background-image: none !important;
+  transition: background-color 0.25s;
+}
+:root[vfx-accent] #TabsToolbar {
+  color: var(--vfx-accent-text) !important;
+  --toolbarbutton-icon-fill: var(--vfx-accent-text);
+}
+:root[vfx-accent] #TabsToolbar .tabbrowser-tab:not([selected], [visuallyselected]) {
+  color: var(--vfx-accent-text) !important;
+}

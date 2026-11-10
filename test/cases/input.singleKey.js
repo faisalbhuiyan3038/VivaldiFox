@@ -1,0 +1,16 @@
+const a = await openTab(web("<title>A</title><input id=i>")); const b = await openTab(web("<title>B</title>b"));
+gBrowser.selectedTab = b; b.linkedBrowser.focus(); await sleep(200);
+assert(!win.vfxSingleKey.isTyping(), "not typing on a plain page");
+const e = keydown(doc.documentElement, "1");
+await waitFor(() => gBrowser.selectedTab === a, "'1' switched to previous tab");
+assert(e.defaultPrevented, "consumed");
+a.linkedBrowser.focus();
+await inContent(a, "content.document.getElementById('i').focus()");
+await waitFor(() => win.vfxSingleKey.isTyping(), "typing detected inside a web page input");
+const e2 = keydown(doc.documentElement, "2");
+await sleep(150);
+assert(gBrowser.selectedTab === a && !e2.defaultPrevented, "ignored while typing in page");
+win.gURLBar.focus(); await sleep(150);
+const e3 = keydown(doc.documentElement, "2");
+assert(gBrowser.selectedTab === a && !e3.defaultPrevented, "ignored while typing in the address bar");
+return "single key works on page, suppressed in page inputs (IME state) and in the address bar";

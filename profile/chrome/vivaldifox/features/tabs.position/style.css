@@ -1,0 +1,28 @@
+/* T1 tab bar at the bottom. */
+:root[vfx-tabs-bottom] #TabsToolbar {
+  /* Bottom bars are ordered with CSS, independent of which feature started
+     first: address bar 10, tab bar 20, stack row 21, status bar 30. */
+  order: 20;
+  border-top: 1px solid var(--chrome-content-separator-color, color-mix(in srgb, currentColor 20%, transparent));
+  background-color: var(--toolbox-bgcolor, var(--toolbar-bgcolor, Canvas));
+  color: var(--toolbox-textcolor, var(--toolbar-color, CanvasText));
+}
+/* Window controls: hide the copy in the (now bottom) tab bar... */
+:root[vfx-tabs-bottom] #TabsToolbar > .titlebar-buttonbox-container,
+:root[vfx-tabs-bottom] #TabsToolbar > .titlebar-spacer {
+  display: none !important;
+}
+/* ...and show the navigation bar's own copy, which Firefox keeps for vertical tabs. */
+:root[vfx-tabs-bottom][customtitlebar] #nav-bar > .titlebar-buttonbox-container {
+  display: flex !important;
+}
+/* The top bar is now the drag region of the window. */
+:root[vfx-tabs-bottom][customtitlebar] #nav-bar {
+  -moz-window-dragging: drag;
+}
+:root[vfx-tabs-bottom]:is([inFullscreen], [inDOMFullscreen]) #TabsToolbar {
+  display: none;
+}
+:root[vfx-tabs-bottom] #TabsToolbar {
+  flex: 0 0 auto;
+}

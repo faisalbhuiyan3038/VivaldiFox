@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- MPL-2.0. VivaldiFox settings (privileged chrome document). -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src chrome:; img-src chrome: data:; style-src chrome: 'unsafe-inline'; object-src 'none'">
+  <meta name="color-scheme" content="light dark">
+  <title>VivaldiFox Settings</title>
+  <link rel="icon" href="chrome://vivaldifox/content/icons/settings.svg">
+  <link rel="stylesheet" href="chrome://vivaldifox/content/options/options.css">
+</head>
+<body>
+  <header>
+    <h1>VivaldiFox</h1>
+    <p class="sub">Every feature is independent: switch on only what you want. Changes apply immediately.</p>
+    <div class="bar">
+      <label class="master"><input type="checkbox" id="master"> <span>Master switch (<code>vivaldifox.enabled</code>)</span></label>
+      <input type="search" id="filter" placeholder="Filter features" aria-label="Filter features">
+      <button type="button" id="all-off">Turn all off</button>
+      <span id="summary" role="status"></span>
+    </div>
+  </header>
+  <main id="features"></main>
+  <section id="shared">
+    <h2>Side panel (shared by all panel features)</h2>
+    <div class="opt"><label for="panel-side">Panel side</label>
+      <select id="panel-side"><option value="left">Left</option><option value="right">Right</option></select></div>
+    <div class="opt"><label for="panel-width">Panel width (px)</label><input type="number" id="panel-width" min="180" max="1000"></div>
+  </section>
+  <section id="reference">
+    <h2>Command reference</h2>
+    <p class="sub">Command ids for the gesture, shortcut, single-key and chain maps. Commands of a feature exist only while that feature is on.</p>
+    <div id="commands"></div>
+  </section>
+  <script type="module" src="chrome://vivaldifox/content/options/options.js"></script>
+</body>
+</html>

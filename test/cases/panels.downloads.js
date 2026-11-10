@@ -1,0 +1,13 @@
+$('.vfx-panel-btn[data-panel="downloads"]').doCommand();
+const node = await waitFor(() => $('.vfx-panel[data-panel="downloads"]'), "panel built");
+const D = win.Downloads;
+const list = await D.getList(D.PUBLIC);
+const target = PathUtils.join(PathUtils.tempDir, "vfx-dl-test-" + Date.now() + ".html");
+const dl = await D.createDownload({ source: web("<title>dl</title>download me"), target });
+await list.add(dl);
+const row = await waitFor(() => [...node.querySelectorAll(".vfx-dl-row")].find(r => r.textContent.includes("vfx-dl-test")), "download row appears");
+await dl.start();
+await waitFor(() => /B|Completed/.test(row.querySelector(".vfx-p-sub").textContent) && dl.succeeded, "row shows completion: " + row.textContent);
+await list.remove(dl); await dl.finalize(true); await IOUtils.remove(target, { ignoreAbsent: true });
+await waitFor(() => !row.isConnected, "row removed with the download");
+return "live download appears, completes and disappears in the panel";

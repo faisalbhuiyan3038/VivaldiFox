@@ -1,0 +1,10 @@
+await waitFor(() => $("#vfx-images"), "widget");
+assert(Services.prefs.getIntPref("permissions.default.image") === 1, "starts at 1");
+const t = await openTab(page("<title>img</title>x")); gBrowser.selectedTab = t;
+VivaldiFox.Commands.run("page.toggleImages", win);
+assert(Services.prefs.getIntPref("permissions.default.image") === 2, "blocked");
+await waitFor(() => /imageoff/.test($("#vfx-images").style.listStyleImage), "icon reflects state");
+Services.prefs.setBoolPref("vivaldifox.page.imageToggle.enabled", false);
+await sleep(300);
+assert(!Services.prefs.prefHasUserValue("permissions.default.image"), "user pref restored on disable");
+return "pref toggled to block, icon updated, original value restored on disable";

@@ -1,0 +1,24 @@
+if (VivaldiFox.status().some(s => s.running)) return "skipped in all-on mode";
+VivaldiFox.openOptions(win);
+const t = await waitFor(() => gBrowser.tabs.find(x => x.linkedBrowser.currentURI.spec === VivaldiFox.optionsURL), "options tab");
+const d = () => t.linkedBrowser.contentDocument;
+await waitFor(() => d()?.querySelectorAll(".feature").length === VivaldiFox.FEATURES.length, "every feature listed");
+assert($("#vfx-menu-options"), "Tools menu entry present");
+const box = d().querySelector('input[data-feature="tabs.trash"]');
+assert(!box.checked, "features default to off");
+box.click();
+await waitFor(() => Services.prefs.getBoolPref("vivaldifox.tabs.trash.enabled") && $("#vfx-trash"), "toggle writes the pref and the feature starts live");
+await waitFor(() => d().querySelector('.feature[data-id="tabs.trash"]')?.getAttribute("data-running") === "true", "page shows it running");
+// options: int, enum, json (with validation)
+const num = d().querySelector("#opt-tabs-trash-maxItems"); num.value = "7"; num.dispatchEvent(new (d().defaultView.Event)("change", { bubbles: true }));
+assert(Services.prefs.getIntPref("vivaldifox.tabs.trash.maxItems") === 7, "int option written");
+const ta = d().querySelector("#opt-input-gestures-map");
+ta.value = "{ not json"; ta.dispatchEvent(new (d().defaultView.Event)("change", { bubbles: true }));
+assert(!Services.prefs.prefHasUserValue("vivaldifox.input.gestures.map") && ta.classList.contains("bad"), "invalid JSON rejected, not saved");
+ta.value = '{"L":"forward"}'; ta.dispatchEvent(new (d().defaultView.Event)("change", { bubbles: true }));
+assert(VivaldiFox.opt("input.gestures", "map").L === "forward", "valid JSON saved");
+assert(d().querySelectorAll("#commands div").length > 40, "command reference listed");
+d().querySelector("#all-off").click();
+await waitFor(() => !VivaldiFox.status().some(s => s.running) && !$("#vfx-trash"), "Turn all off stops everything");
+Services.prefs.clearUserPref("vivaldifox.tabs.trash.maxItems"); Services.prefs.clearUserPref("vivaldifox.input.gestures.map");
+return VivaldiFox.FEATURES.length + " features listed; toggles and options write prefs live; bad JSON rejected";
