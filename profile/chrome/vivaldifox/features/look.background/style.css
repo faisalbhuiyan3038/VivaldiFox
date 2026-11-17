@@ -1,17 +1,60 @@
-/* L4 window background image. The image sits on the toolbox; toolbars above
-   it become translucent so it shows through behind tabs and buttons. */
-:root[vfx-window-bg] #navigator-toolbox {
+/* L4 window background image.
+   The image lives on the window root, sized to the whole window, so its crop
+   never changes when bars appear or disappear. Bars are made translucent with
+   one rule each; the doubled attribute selector out-ranks look.accent's
+   toolbox colour so the two features combine instead of fighting. */
+:root[vfx-window-bg] {
   background-image: var(--vfx-window-bg) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
 }
+/* Recent Firefox wraps the window in an html:body with its own opaque
+   background (and gradient), which would cover the image on the root. */
+:root[vfx-window-bg] > body {
+  background: transparent !important;
+}
+:root[vfx-window-bg][vfx-window-bg] #navigator-toolbox {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Toolbars. */
 :root[vfx-window-bg] #nav-bar,
 :root[vfx-window-bg] #PersonalToolbar,
-:root[vfx-window-bg] #toolbar-menubar {
+:root[vfx-window-bg] #toolbar-menubar,
+:root[vfx-window-bg] #vfx-statusbar,
+:root[vfx-window-bg] #vfx-panels,
+:root[vfx-window-bg] #vfx-panel-box {
   background-color: color-mix(in srgb, var(--toolbar-bgcolor, Canvas) var(--vfx-toolbar-opacity, 60%), transparent) !important;
   background-image: none !important;
 }
+/* The selected tab joins the navigation bar, so it gets the same translucency
+   instead of being an opaque slab. */
 :root[vfx-window-bg] #TabsToolbar {
-  background-color: color-mix(in srgb, var(--toolbox-bgcolor, Canvas) calc(var(--vfx-toolbar-opacity, 60%) / 2), transparent) !important;
+  background-color: color-mix(in srgb, var(--toolbox-bgcolor, Canvas) var(--vfx-tabbar-opacity, 30%), transparent) !important;
+  background-image: none !important;
+  /* Old and new (Firefox 160+) names of the selected-tab colour. */
+  --tab-selected-bgcolor: color-mix(in srgb, var(--toolbar-bgcolor, Canvas) var(--vfx-toolbar-opacity, 60%), transparent);
+  --tab-background-color-selected: color-mix(in srgb, var(--toolbar-bgcolor, Canvas) var(--vfx-toolbar-opacity, 60%), transparent);
+}
+:root[vfx-window-bg][vfx-accent] #TabsToolbar {
+  background-color: color-mix(in srgb, var(--vfx-accent) var(--vfx-tabbar-opacity, 30%), transparent) !important;
+}
+
+/* Vertical tabs and the sidebar: the image shows through them too. */
+:root[vfx-window-bg] :is(#sidebar-main, sidebar-main, #sidebar-box) {
+  background-color: color-mix(in srgb, var(--toolbox-bgcolor, Canvas) var(--vfx-tabbar-opacity, 30%), transparent) !important;
+  background-image: none !important;
+}
+:root[vfx-window-bg] #vertical-tabs,
+:root[vfx-window-bg] #browser {
+  background-color: transparent !important;
+}
+
+/* Address and search fields stay legible: mostly opaque, fully opaque while in use. */
+:root[vfx-window-bg] #urlbar:not([focused], [open]) > .urlbar-background,
+:root[vfx-window-bg] #searchbar:not(:focus-within) {
+  background-color: color-mix(in srgb, var(--toolbar-field-background-color, Field) var(--vfx-field-opacity, 85%), transparent) !important;
 }

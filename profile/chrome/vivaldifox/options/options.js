@@ -105,6 +105,8 @@ function render() {
   $("#master").checked = P.getBoolPref(`${PREF}enabled`, true);
   $("#panel-side").value = P.getStringPref(`${PREF}panels.side`, "left");
   $("#panel-width").value = P.getIntPref(`${PREF}panels.width`, 340);
+  $("#panel-autohide").checked = P.getBoolPref(`${PREF}panels.autohide`, false);
+  $("#panel-hidden").checked = P.getBoolPref(`${PREF}panels.hidden`, false);
   const win = window.browsingContext.topChromeWindow;
   $("#commands").replaceChildren(...VivaldiFox.Commands.list(win).map(c => el("div", {}, [el("code", { text: c.id }), ` ${c.label}`])));
 }
@@ -116,6 +118,8 @@ $("#all-off").addEventListener("click", () => {
   setTimeout(render, 200);
 });
 $("#panel-side").addEventListener("change", e => P.setStringPref(`${PREF}panels.side`, e.target.value));
+$("#panel-autohide").addEventListener("change", e => P.setBoolPref(`${PREF}panels.autohide`, e.target.checked));
+$("#panel-hidden").addEventListener("change", e => P.setBoolPref(`${PREF}panels.hidden`, e.target.checked));
 $("#panel-width").addEventListener("change", e => { if (/^\d+$/.test(e.target.value)) P.setIntPref(`${PREF}panels.width`, Math.max(180, Math.min(Number(e.target.value), 1000))); });
 
 // Stay in sync with about:config and other windows (re-render unless the user is typing).

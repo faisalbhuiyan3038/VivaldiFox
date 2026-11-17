@@ -17,6 +17,8 @@ import { h } from "./ui.sys.mjs";
 
 const SIDE_PREF = "vivaldifox.panels.side";   // "left" | "right"
 const WIDTH_PREF = "vivaldifox.panels.width"; // px
+const AUTOHIDE_PREF = "vivaldifox.panels.autohide"; // bar slides in at the window edge
+const HIDDEN_PREF = "vivaldifox.panels.hidden";     // bar switched off until toggled back
 const hosts = new WeakMap();
 
 class Host {
@@ -49,6 +51,7 @@ class Host {
     this.prefObs = { observe: () => this.#applyPrefs() };
     Services.prefs.addObserver("vivaldifox.panels.", this.prefObs);
     this.#resizable();
+    this.#autohide();
   }
 
   #applyPrefs() {
@@ -56,6 +59,31 @@ class Host {
     this.root.setAttribute("side", Services.prefs.getStringPref(SIDE_PREF, "left") === "right" ? "right" : "left");
     const w = Math.max(180, Math.min(Services.prefs.getIntPref(WIDTH_PREF, 340), 1000));
     this.box.style.width = w + "px";
+    const auto = Services.prefs.getBoolPref(AUTOHIDE_PREF, false);
+    this.root.toggleAttribute("autohide", auto);
+    this.win.document.documentElement.toggleAttribute("vfx-panels-autohide", auto);
+    this.root.toggleAttribute("barhidden", Services.prefs.getBoolPref(HIDDEN_PREF, false));
+  }
+
+  /**
+   * Auto-hide: the bar is tucked away except for a thin strip at the edge and
+   * slides in on hover. It also stays out while a panel was opened from the
+   * keyboard (until the pointer leaves it or the panel closes) and while one
+   * of its context menus is open.
+   */
+  #autohide() {
+    const root = this.root;
+    root.addEventListener("mouseleave", () => root.removeAttribute("reveal"));
+    root.addEventListener("contextmenu", () => {
+      root.setAttribute("pinned-open", "true");
+      const doc = this.win.document;
+      const done = e => {
+        if (e.target.localName !== "menupopup") return;
+        root.removeAttribute("pinned-open");
+        doc.removeEventListener("popuphidden", done, true);
+      };
+      doc.addEventListener("popuphidden", done, true);
+    });
   }
 
   #resizable() {
@@ -90,6 +118,7 @@ class Host {
     this.root = this.strip = this.box = this.content = this.title = this.grip = null;
     this.current = null;
     this.win.document.documentElement.removeAttribute("vfx-panel-open");
+    this.win.document.documentElement.removeAttribute("vfx-panels-autohide");
   }
 
   add(def) {
@@ -141,6 +170,10 @@ class Host {
     this.grip.hidden = false;
     this.current = id;
     this.win.document.documentElement.setAttribute("vfx-panel-open", id);
+    // Opened from a shortcut or command while auto-hidden: show it until the pointer leaves.
+    if (this.root.hasAttribute("autohide") && !this.root.matches(":hover")) this.root.setAttribute("reveal", "true");
+    // Opening a panel also brings back a bar that was switched off.
+    if (this.root.hasAttribute("barhidden")) Services.prefs.setBoolPref(HIDDEN_PREF, false);
     try { p.def.onShow?.(p.node, this.win); } catch (e) { console.error(e); }
     return true;
   }
@@ -150,6 +183,7 @@ class Host {
     this.box.hidden = true;
     this.grip.hidden = true;
     for (const q of this.panels.values()) q.button.removeAttribute("checked");
+    this.root.removeAttribute("reveal");
     this.current = null;
     this.win.document.documentElement.removeAttribute("vfx-panel-open");
   }
@@ -179,6 +213,13 @@ export const Panels = {
   toggle: (win, id) => host(win).toggle(id),
   current: win => host(win).current,
   ids: win => [...host(win).panels.keys()],
+  /** Show / hide the whole panel bar (persists). */
+  toggleBar() {
+    Services.prefs.setBoolPref(HIDDEN_PREF, !Services.prefs.getBoolPref(HIDDEN_PREF, false));
+  },
+  toggleAutohide() {
+    Services.prefs.setBoolPref(AUTOHIDE_PREF, !Services.prefs.getBoolPref(AUTOHIDE_PREF, false));
+  },
   /** Toggle the last used (or first) panel: used by the "panels.toggle" command. */
   toggleLast(win) {
     const hst = host(win);

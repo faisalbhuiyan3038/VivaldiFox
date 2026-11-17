@@ -65,13 +65,16 @@ export const FEATURES = [
   },
   {
     id: "tabs.appearance", cat: "Tabs", title: "Tab appearance options",
-    desc: "Close-button placement, unread indicator, minimum tab width.",
+    desc: "Close-button placement, unread indicator, minimum tab width, and an Arc-style look for vertical tabs.",
     module: true, css: true,
     options: {
       closeButton: { type: "enum", values: ["default", "hover", "left", "hidden"], default: "hover", label: "Close button" },
       unreadIndicator: { type: "bool", default: true, label: "Mark unread background tabs" },
       activeBold: { type: "bool", default: false, label: "Bold title on the active tab" },
       minWidth: { type: "int", default: 0, label: "Minimum tab width in px (0 = Firefox default)" },
+      verticalStyle: { type: "enum", values: ["arc", "compact", "default"], default: "arc", label: "Vertical tabs style (arc = roomy rounded rows, compact = denser rows, default = Firefox's own)" },
+      floatingPage: { type: "bool", default: true, label: "With vertical tabs: show the page as a rounded card inset from the window edge" },
+      favoritesGrid: { type: "bool", default: true, label: "With vertical tabs: show pinned tabs as a grid of large tiles" },
     },
   },
   {
@@ -87,8 +90,12 @@ export const FEATURES = [
   },
   {
     id: "tabs.workspaces", cat: "Tabs", title: "Workspaces",
-    desc: "Named sets of tabs; only the active workspace's tabs are shown. Tabs are hidden, never closed.",
+    desc: "Named sets of tabs; only the active workspace's tabs are shown. Tabs are hidden, never closed. Tab groups stay in their workspace. Scroll over the workspace button to switch.",
     module: true, css: true,
+    options: {
+      wheelSwitch: { type: "bool", default: true, label: "Scroll over the workspace button to switch workspaces", live: true },
+      swipeSwitch: { type: "bool", default: true, label: "Horizontal scroll (touchpad swipe) over vertical tabs switches workspaces", live: true },
+    },
   },
   {
     id: "tabs.sessions", cat: "Tabs", title: "Named sessions",
@@ -116,8 +123,14 @@ export const FEATURES = [
   },
   {
     id: "nav.progress", cat: "Navigation", title: "Load progress in the address field",
-    desc: "Paints page-load progress behind the address text.",
+    desc: "Paints page-load progress behind the address text, or as a thin line under it.",
     module: true, css: true,
+    options: {
+      style: { type: "enum", values: ["fill", "line"], default: "fill", label: "Style (fill behind the text, or a line at the bottom of the field)" },
+      color: { type: "enum", values: ["accent", "custom", "rainbow", "page"], default: "accent", label: "Colour (accent = system accent, page = the page's theme colour or favicon)" },
+      customColor: { type: "string", default: "#3b82f6", label: "Custom colour (any CSS colour)" },
+      opacity: { type: "int", default: 35, label: "Fill opacity (10-100 %)" },
+    },
   },
   {
     id: "nav.bottom", cat: "Navigation", title: "Address bar at the bottom",
@@ -334,6 +347,8 @@ export const FEATURES = [
     options: {
       image: { type: "string", default: "", label: "Image (URL or file path)" },
       toolbarOpacity: { type: "int", default: 60, label: "Toolbar opacity over the image (0-100 %)" },
+      tabbarOpacity: { type: "int", default: 30, label: "Tab bar / vertical tabs opacity over the image (0-100 %)" },
+      fieldOpacity: { type: "int", default: 85, label: "Address field opacity over the image (0-100 %)" },
     },
   },
   {

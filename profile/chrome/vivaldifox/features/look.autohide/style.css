@@ -27,3 +27,32 @@
 :root[vfx-ui-hidden="hover"][customizing] #navigator-toolbox {
   margin-bottom: 0;
 }
+
+/* While it overlays the page, the toolbox must be opaque. With the default
+   theme the toolbox itself has no background (the window paints it), so on
+   its own it would be see-through over the page and unreadable. Layers, top
+   to bottom: a theme header image if any, the theme's toolbox colour, the
+   toolbar colour, and an opaque system colour as the last resort. */
+/* #main-window raises specificity above look.background / look.accent. */
+:root#main-window[vfx-ui-hidden="hover"] #navigator-toolbox {
+  background-color: Canvas !important;
+  background-image:
+    var(--lwt-header-image, none),
+    linear-gradient(var(--toolbox-bgcolor, transparent), var(--toolbox-bgcolor, transparent)),
+    linear-gradient(var(--toolbar-bgcolor, transparent), var(--toolbar-bgcolor, transparent)) !important;
+  background-position: right top, 0 0, 0 0 !important;
+  background-repeat: no-repeat !important;
+  background-size: auto, 100% 100%, 100% 100% !important;
+  color: var(--toolbox-textcolor, var(--toolbar-color, CanvasText));
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+/* With a window background image, the overlaid toolbox shows the same part of
+   the image the window would (fixed attachment), over the opaque layers. */
+:root#main-window[vfx-ui-hidden="hover"][vfx-window-bg] #navigator-toolbox {
+  background-image:
+    var(--vfx-window-bg),
+    linear-gradient(var(--toolbox-bgcolor, transparent), var(--toolbox-bgcolor, transparent)) !important;
+  background-attachment: fixed, scroll !important;
+  background-position: center, 0 0 !important;
+  background-size: cover, 100% 100% !important;
+}

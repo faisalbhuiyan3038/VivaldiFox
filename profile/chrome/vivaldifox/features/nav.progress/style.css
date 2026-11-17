@@ -1,16 +1,46 @@
-/* A4: progress fill behind the address text. `.urlbar-background` is the
-   long-lived backdrop element of the address field. */
-#urlbar[vfx-loading] > .urlbar-background {
-  background-image: linear-gradient(
-    to right,
-    color-mix(in srgb, AccentColor 30%, transparent) var(--vfx-progress, 0%),
-    transparent var(--vfx-progress, 0%)
-  ) !important;
-  transition: background-image 0.2s;
+/* A4: load progress inside the address field. Drawn as a pseudo-element of
+   `.urlbar-background` (the long-lived backdrop of the field), so it sits
+   behind the text and never covers the results list when the field opens. */
+#urlbar[vfx-progress-pos] > .urlbar-background {
+  position: relative;
 }
-#urlbar[vfx-loading="done"] > .urlbar-background {
-  background-image: linear-gradient(to right, color-mix(in srgb, AccentColor 12%, transparent) 100%, transparent 100%) !important;
+#urlbar[vfx-loading]:not([open]) > .urlbar-background::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--vfx-progress, 0%);
+  border-radius: inherit;
+  background-color: var(--vfx-progress-color-value, AccentColor);
+  opacity: var(--vfx-progress-alpha, 0.35);
+  pointer-events: none;
+  transition: width 0.25s ease-out, opacity 0.3s;
 }
-#urlbar:-moz-locale-dir(rtl)[vfx-loading] > .urlbar-background {
-  transform: scaleX(-1);
+/* Line style: a thin bar along the bottom edge of the field. */
+#urlbar[vfx-progress-style="line"][vfx-loading]:not([open]) > .urlbar-background::after {
+  inset-block: auto 0;
+  height: 2px;
+  border-radius: 2px;
+}
+/* Rainbow: a flowing spectrum, clipped (not squeezed) to the loaded width. */
+#urlbar[vfx-progress-color="rainbow"][vfx-loading]:not([open]) > .urlbar-background::after {
+  background-color: transparent;
+  background-image: linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #00c7be, #007aff, #af52de, #ff3b30);
+  background-size: 200vw 100%;
+  animation: vfx-progress-rainbow 2.4s linear infinite;
+}
+@keyframes vfx-progress-rainbow {
+  from { background-position: 0 0; }
+  to { background-position: 200vw 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #urlbar[vfx-progress-color="rainbow"] > .urlbar-background::after {
+    animation: none;
+  }
+}
+/* Finished: fill the field, then fade out. */
+#urlbar[vfx-loading="done"]:not([open]) > .urlbar-background::after {
+  width: 100%;
+  opacity: 0;
+  transition: width 0.15s ease-out, opacity 0.35s 0.1s;
 }

@@ -35,3 +35,156 @@
 :root[vfx-tab-bold] .tabbrowser-tab:is([selected], [visuallyselected]) .tab-label {
   font-weight: 600;
 }
+
+/* ───────────── Vertical tabs, Arc-inspired ─────────────
+   Only active while Firefox's native vertical tabs are on ([vfx-vtabs]).
+   Firefox's own tab variables are overridden first (most durable), then the
+   few direct rules that the variables do not reach. Colours are built from
+   currentColor / light-dark() so they follow any theme. */
+:root[vfx-vtabs]:is([vfx-vtab-style="arc"], [vfx-vtab-style="compact"]) #tabbrowser-tabs[orient="vertical"] {
+  --vfx-vt-radius: 10px;
+  --vfx-vt-height: 36px;
+  --vfx-vt-hover: color-mix(in srgb, currentColor 8%, transparent);
+  --vfx-vt-selected: light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.16));
+  /* light-dark() only takes colours, so it goes inside each shadow, not around it. */
+  --vfx-vt-shadow: 0 1px 3px light-dark(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.45)), 0 0 0 0.5px color-mix(in srgb, currentColor 14%, transparent);
+  --tab-min-height: var(--vfx-vt-height);
+  --tab-border-radius: var(--vfx-vt-radius);
+  --tab-hover-background-color: var(--vfx-vt-hover);
+  --tab-selected-bgcolor: var(--vfx-vt-selected);
+  --tab-selected-shadow: var(--vfx-vt-shadow);
+  /* Firefox 160+ names. */
+  --tab-background-color-selected: var(--vfx-vt-selected);
+  --tab-background-color-hover: var(--vfx-vt-hover);
+  --tab-outline-color: transparent;
+}
+:root[vfx-vtabs][vfx-vtab-style="compact"] #tabbrowser-tabs[orient="vertical"] {
+  --vfx-vt-radius: 7px;
+  --vfx-vt-height: 30px;
+}
+
+/* Rows: no borders or outlines, a soft fill on hover, a raised card when selected. */
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
+  padding-block: 1px !important;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab .tab-background {
+  border: 0 !important;
+  outline: none !important;
+  border-radius: var(--vfx-vt-radius) !important;
+  min-height: var(--vfx-vt-height) !important;
+  background-image: none !important;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:not([selected], [visuallyselected], [multiselected]):hover .tab-background {
+  background-color: var(--vfx-vt-hover) !important;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:is([selected], [visuallyselected]) .tab-background {
+  background-color: var(--vfx-vt-selected) !important;
+  box-shadow: var(--vfx-vt-shadow) !important;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[multiselected]:not([selected]) .tab-background {
+  background-color: color-mix(in srgb, AccentColor 18%, transparent) !important;
+  box-shadow: none !important;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab .tab-content {
+  padding-inline: 10px 6px !important;
+  gap: 2px;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab .tab-label {
+  font-size: 13px;
+  font-weight: 450;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:is([selected], [visuallyselected]) .tab-label {
+  font-weight: 550;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab .tab-close-button {
+  border-radius: 6px !important;
+  opacity: 0.6;
+}
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab .tab-close-button:hover {
+  opacity: 1;
+  background-color: color-mix(in srgb, currentColor 12%, transparent) !important;
+}
+/* Unloaded (discarded) tabs fade a little, like Arc's archived tabs. */
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[pending]:not([selected]) .tab-content {
+  opacity: 0.6;
+}
+
+/* The new-tab row matches the tab rows. */
+:root[vfx-vtabs][vfx-vtab-style] :is(#vertical-tabs-newtab-button, #tabbrowser-tabs[orient="vertical"] #tabs-newtab-button) {
+  border-radius: var(--vfx-vt-radius, 10px) !important;
+  min-height: var(--vfx-vt-height, 36px);
+  opacity: 0.75;
+}
+:root[vfx-vtabs][vfx-vtab-style] :is(#vertical-tabs-newtab-button, #tabbrowser-tabs[orient="vertical"] #tabs-newtab-button):hover {
+  opacity: 1;
+  background-color: var(--vfx-vt-hover, color-mix(in srgb, currentColor 8%, transparent)) !important;
+}
+
+/* Tab group labels: rounded chips with a little breathing room. */
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tab-group-label {
+  border-radius: 7px !important;
+  font-weight: 600;
+}
+
+/* ───── Pinned tabs as a tile grid ("favorites"), expanded sidebar only ───── */
+/* The container is an arrowscrollbox: its tabs are laid out by the
+   items-wrapper part inside its shadow DOM, so the grid goes there. */
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] :is(#pinned-tabs-container, #vertical-pinned-tabs-container) {
+  padding-block: 4px 8px !important;
+  margin-bottom: 4px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] :is(#pinned-tabs-container, #vertical-pinned-tabs-container)::part(items-wrapper) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)) !important;
+  gap: 6px !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab[pinned] {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 0 !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab[pinned] .tab-background {
+  min-height: 42px !important;
+  border-radius: 12px !important;
+  background-color: color-mix(in srgb, currentColor 6%, transparent) !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab[pinned]:hover .tab-background {
+  background-color: color-mix(in srgb, currentColor 11%, transparent) !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab[pinned]:is([selected], [visuallyselected]) .tab-background {
+  background-color: var(--vfx-vt-selected) !important;
+  box-shadow: var(--vfx-vt-shadow) !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-grid] #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab[pinned] .tab-content {
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+/* ───── The page as a rounded card inset from the window edge ───── */
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float] #browser {
+  /* Same colour as the navigation bar above, so card, bar and sidebar read as one frame. */
+  background-color: var(--toolbar-bgcolor, var(--toolbox-bgcolor, Canvas));
+  --chrome-content-separator-color: transparent;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float] :is(#sidebar-main, sidebar-main, #vertical-tabs) {
+  background-color: transparent !important;
+  border: 0 !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float]:not([inFullscreen], [inDOMFullscreen]) #tabbrowser-tabbox {
+  margin-block: 0 8px !important;
+  margin-inline: 0 8px !important;
+  border-radius: 10px !important;
+  overflow: clip !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 9%, transparent), 0 2px 12px rgba(0, 0, 0, 0.14) !important;
+}
+:root[vfx-vtabs="end"][vfx-vtab-style][vfx-vtab-float]:not([inFullscreen], [inDOMFullscreen]) #tabbrowser-tabbox {
+  margin-inline: 8px 0 !important;
+}
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float] #nav-bar {
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}

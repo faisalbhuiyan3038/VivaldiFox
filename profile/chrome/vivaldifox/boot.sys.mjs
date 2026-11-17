@@ -264,6 +264,8 @@ function boot() {
   // Shared panel host settings (not a feature: used by whichever panels are on).
   setDefault(PREF + "panels.side", "string", "left");
   setDefault(PREF + "panels.width", "int", 340);
+  setDefault(PREF + "panels.autohide", "bool", false);
+  setDefault(PREF + "panels.hidden", "bool", false);
   for (const def of FEATURES) {
     setDefault(`${PREF}${def.id}.enabled`, "bool", false);
     for (const [key, o] of Object.entries(def.options || {})) setDefault(`${PREF}${def.id}.${key}`, o.type === "enum" ? "string" : o.type, o.default);
@@ -272,6 +274,8 @@ function boot() {
 
   Commands.register(new Scope(), { id: "vfx.options", label: "VivaldiFox settings", run: w => VivaldiFox.openOptions(w) });
   Commands.register(new Scope(), { id: "panels.toggle", label: "Toggle side panel", run: w => Panels.toggleLast(w) });
+  Commands.register(new Scope(), { id: "panels.toggleBar", label: "Show / hide the panel bar", run: () => Panels.toggleBar() });
+  Commands.register(new Scope(), { id: "panels.toggleAutohide", label: "Auto-hide the panel bar on / off", run: () => Panels.toggleAutohide() });
 
   Services.prefs.addObserver(PREF, {
     observe(_s, _t, name) {

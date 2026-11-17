@@ -26,6 +26,7 @@ const URLS = {
   PrivateBrowsingUtils: ["resource://gre/modules/PrivateBrowsingUtils.sys.mjs"],
   E10SUtils: ["resource://gre/modules/E10SUtils.sys.mjs"],
   NewTabUtils: ["resource://gre/modules/NewTabUtils.sys.mjs"],
+  SearchService: ["moz-src:///toolkit/components/search/SearchService.sys.mjs", "resource://gre/modules/SearchService.sys.mjs"],
 };
 
 const cache = new Map();

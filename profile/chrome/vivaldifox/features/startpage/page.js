@@ -266,7 +266,8 @@ $("#search").addEventListener("submit", async e => {
   if (!q) return;
   let url = q;
   try {
-    const engine = await Services.search.getDefault();
+    // Services.search was removed in Firefox 160; the module export replaces it.
+    const engine = await (Services.search || Fx.SearchService).getDefault();
     url = engine.getSubmission(q).uri.spec;
   } catch {}
   navigate(url, e);

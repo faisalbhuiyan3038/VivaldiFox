@@ -116,7 +116,7 @@ These still toggle live and independently. `fallback/user.js` also lists the pla
 - **Master switch:** `vivaldifox.enabled` (default `true`). Off stops everything; on restores exactly what you had chosen.
 - **Feature switch:** `vivaldifox.<id>.enabled` (default `false`).
 - **Feature option:** `vivaldifox.<id>.<option>`.
-- **Side panel (shared by all panel features):** `vivaldifox.panels.side` (`left`/`right`), `vivaldifox.panels.width`.
+- **Side panel (shared by all panel features):** `vivaldifox.panels.side` (`left`/`right`), `vivaldifox.panels.width`, `vivaldifox.panels.autohide` (bar slides in at the window edge), `vivaldifox.panels.hidden` (bar switched off; commands `panels.toggleBar` and `panels.toggleAutohide`).
 - Firefox **safe mode** (Troubleshoot Mode) disables the whole mod.
 
 Options that hold maps or lists are JSON. The settings page validates them and refuses to save invalid JSON; a broken value typed into `about:config` is ignored in favour of the default.
@@ -137,10 +137,10 @@ Options that hold maps or lists are JSON. The settings page validates them and r
 | `tabs.clickBehaviors` | Double-click closes; wheel switches tabs; click active tab → previous tab | Pref + JS | `doubleClickClose`, `wheelSwitch`, `activeToPrevious` | – |
 | `tabs.rename` | Custom tab title, kept across navigation and restart | JS | – | Uses one internal tabbrowser method, with a fallback |
 | `tabs.muteOthers` | "Mute Other Tabs"; optional audio only in the active tab | JS | `activeOnly` | – |
-| `tabs.appearance` | Close-button placement, unread dot, bold active title, minimum width | CSS + JS | `closeButton` (`default`/`hover`/`left`/`hidden`), `unreadIndicator`, `activeBold`, `minWidth` | – |
+| `tabs.appearance` | Close-button placement, unread dot, bold active title, minimum width; Arc-inspired restyle of native vertical tabs (rounded rows, raised selected tab, pinned-tab tile grid, page as a rounded inset card) | CSS + JS | `closeButton` (`default`/`hover`/`left`/`hidden`), `unreadIndicator`, `activeBold`, `minWidth`, `verticalStyle` (`arc`/`compact`/`default`), `floatingPage`, `favoritesGrid` | Vertical styling relies on Firefox's vertical-tab element ids |
 | `tabs.position` | Tab bar at the bottom, left or right | Pref (left/right), JS + CSS (bottom) | `position` | See note 1 |
 | `tabs.tiling` | Tile two tabs side by side: command, button, tab-menu item | JS on native Split View | – | Two tabs only; no grids |
-| `tabs.workspaces` | Named sets of tabs; only the active set is shown | JS | – | See note 2 |
+| `tabs.workspaces` | Named sets of tabs; only the active set is shown. Tab groups stay in their workspace. Scroll over the workspace button (or swipe horizontally over vertical tabs) to switch | JS | `wheelSwitch`, `swipeSwitch` | See note 2 |
 | `tabs.sessions` | Save the open tabs under a name; reopen here or in a new window | JS | – | Saves address, title, pinned state; not per-tab history |
 | `tabs.twoLevel` | Tab stacks: a second row lists the tabs of the active stack | JS + CSS on native tab groups | `collapseStacks` | See note 3 |
 
@@ -154,7 +154,7 @@ Options that hold maps or lists are JSON. The settings page validates them and r
 |---|---|---|---|---|
 | `nav.fastForward` | Fast Forward (next page of a series) and Rewind (first page visited on the site) | JS + Content | `guessUrl` | Next-page detection is heuristic: `rel=next`, then "Next"-like links, then numbered URLs |
 | `nav.qr` | QR code of the current address | JS | – | – |
-| `nav.progress` | Load progress painted in the address field | JS + CSS | – | – |
+| `nav.progress` | Load progress painted in the address field (an estimate: see the header of its `main.sys.mjs`) | JS + CSS | `style` (`fill`/`line`), `color` (`accent`/`custom`/`rainbow`/`page`), `customColor`, `opacity` | – |
 | `nav.bottom` | Address bar below the page; results open upwards | JS + CSS | – | Layout-sensitive; see fragility table |
 
 ### Page
@@ -206,7 +206,7 @@ Speed Dial tiles are bookmarks in a bookmarks folder named **Speed Dial**; its s
 |---|---|---|---|---|
 | `input.gestures` | Mouse gestures with the right button, with a trail | JS | `map`, `trail` | Works on every page, including `about:` pages |
 | `input.rocker` | Hold right + click left = back; hold left + click right = forward | JS | `rightThenLeft`, `leftThenRight` | – |
-| `quickCommands` | F2 palette: commands, open tabs, bookmarks, history | JS | `key`, `maxResults` | – |
+| `quickCommands` | F2 palette: commands (with shortcuts), tabs in all windows and workspaces, closed tabs, bookmarks, history, search-engine keywords, settings pages, workspaces, feature toggles, calculator | JS | `key`, `maxResults` | – |
 | `input.shortcuts` | Any key combination → any command | JS | `map` | Does not show in Firefox's own shortcut list |
 | `input.singleKey` | One-key shortcuts when not typing (1/2 tabs, Z/X history) | JS | `map` | – |
 | `input.chains` | Sequences of commands with waits and URLs | JS | `chains` | A chain cannot call another chain |
@@ -222,8 +222,8 @@ Gestures and rocker gestures make context menus open on mouse-up on every platfo
 | `look.accent` | Tab bar takes the page's colour | JS + CSS (+ Content) | `themeColor`, `favicon`, `strength` | Without the content bridge only the favicon colour is used |
 | `look.themeSchedule` | Light theme by day, dark by night | JS on the public AddonManager | `lightTheme`, `darkTheme`, `lightStart`, `darkStart` | Time-based only; themes are named by add-on id |
 | `look.rounding` | One corner radius for tabs, fields, buttons, popups | CSS | `radius` | – |
-| `look.uiZoom` | Zoom the interface without zooming pages | JS | `percent` | – |
-| `look.background` | Image behind the tab bar and toolbars | CSS | `image`, `toolbarOpacity` | Paints the same toolbox background as `look.accent`: both can be on without errors, but only one of the two is visible, so pick one |
+| `look.uiZoom` | Zoom the interface without zooming pages; extension popups get the same zoom so they are sized correctly | JS | `percent` | – |
+| `look.background` | Image behind the whole window frame (toolbars, tab bar, vertical tabs, panels, status bar) | CSS | `image`, `toolbarOpacity`, `tabbarOpacity`, `fieldOpacity` | With `look.accent` on, the accent tints the tab bar over the image |
 | `look.autohide` | Ctrl+F11 hides all toolbars; optional reveal on hover | JS + CSS | `key`, `revealOnHover`, `startHidden` | Toolbars stay visible while the address bar has focus |
 | `look.menuButton` | One button opening the classic File/Edit/View menus | JS | – | Not useful on macOS, where the menu bar is the system's |
 
@@ -246,7 +246,7 @@ Mail, calendar and feed reader; sync; VPN; ad blocker; translate panel; dashboar
 
 ## Commands and maps
 
-Gestures, shortcuts, single-key shortcuts, chains and Quick Commands all use one command registry. It always contains about 45 Firefox commands (`back`, `newTab`, `reopenTab`, `zoomIn`, `fullscreen` …). Each running feature adds its own (`tabs.hibernateBackground`, `capture.fullFile`, `panels.notes`, `workspaces.next`, `look.toggleUI` …). The settings page lists every command currently available.
+Gestures, shortcuts, single-key shortcuts, chains and Quick Commands all use one command registry. It always contains about 90 Firefox commands (`back`, `newTab`, `reopenTab`, `zoomIn`, `fullscreen` …). Each running feature adds its own (`tabs.hibernateBackground`, `capture.fullFile`, `panels.notes`, `workspaces.next`, `look.toggleUI` …). The settings page lists every command currently available.
 
 A map that names a command whose feature is off is not an error: that entry is skipped and the key or gesture keeps its normal Firefox behaviour.
 

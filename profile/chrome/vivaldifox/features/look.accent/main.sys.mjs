@@ -20,7 +20,7 @@ function parseColor(win, str) {
 }
 
 /** Dominant saturated colour of an image URL, or null. */
-function faviconColor(win, url) {
+export function faviconColor(win, url) {
   return new Promise(resolve => {
     if (!url) return resolve(null);
     const img = new win.Image();

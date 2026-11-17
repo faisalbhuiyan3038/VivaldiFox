@@ -6,3 +6,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Tab groups whose tabs all live in another workspace. */
+tab-group[vfx-ws-hidden] {
+  display: none !important;
+}

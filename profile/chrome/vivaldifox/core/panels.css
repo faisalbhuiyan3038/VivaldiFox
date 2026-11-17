@@ -167,3 +167,33 @@
   opacity: 0.6;
   text-align: center;
 }
+
+/* Panel bar switched off (command panels.toggleBar). */
+#vfx-panels[barhidden] {
+  display: none !important;
+}
+
+/* Auto-hide: the bar overlays the page edge, tucked away except for a 4px
+   strip, and slides in on hover, keyboard focus, or when a panel was opened
+   from a shortcut ([reveal]). */
+:root[vfx-panels-autohide] #browser {
+  position: relative;
+}
+#vfx-panels[autohide] {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0 auto;
+  z-index: 4;
+  transform: translateX(calc(4px - 100%));
+  opacity: 0;
+  transition: transform 0.18s ease-out, opacity 0.18s;
+}
+#vfx-panels[autohide][side="right"] {
+  inset-inline: auto 0;
+  transform: translateX(calc(100% - 4px));
+}
+#vfx-panels[autohide]:is(:hover, :focus-within, [reveal], [pinned-open], [resizing]) {
+  transform: none;
+  opacity: 1;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.25);
+}

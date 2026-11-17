@@ -34,6 +34,7 @@
 .vfx-qc-row {
   display: flex;
   align-items: baseline;
+  min-height: 20px;
   gap: 10px;
   padding: 6px 10px;
   border-radius: 6px;
@@ -64,5 +65,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.85em;
+  opacity: 0.55;
+}
+.vfx-qc-icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  align-self: center;
+  object-fit: contain;
+}
+.vfx-qc-key {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  font: 0.78em/1.5 ui-monospace, monospace;
+  opacity: 0.75;
+}
+#vfx-qc-hint {
+  padding: 5px 12px;
+  border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 0.78em;
   opacity: 0.55;
 }
