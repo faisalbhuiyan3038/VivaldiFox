@@ -180,6 +180,15 @@ export const FEATURES = [
       folder: { type: "string", default: "", label: "Save folder (empty = Downloads)", live: true },
     },
   },
+  {
+    id: "extensions.toggle", cat: "Page", title: "Extensions toggle button",
+    desc: "Toolbar button to disable or restore all extensions, a chosen group, or any single one. Applies to the whole browser.",
+    module: true,
+    options: {
+      selected: { type: "json", default: [], label: "Selected extensions (add-on ids; easier to pick from the button's menu)", live: true },
+      paused: { type: "json", default: [], label: "Extensions the button has turned off (managed automatically)", live: true },
+    },
+  },
 
   // ───────────────────────────── Status bar ─────────────────────────────
   // Keep `statusbar` ahead of the widgets: they pick it as their first-time

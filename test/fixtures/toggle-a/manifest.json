@@ -1,0 +1,6 @@
+{
+  "manifest_version": 2,
+  "name": "VivaldiFox test: toggle A",
+  "version": "1.0",
+  "browser_specific_settings": { "gecko": { "id": "vfx-toggle-a@test" } }
+}

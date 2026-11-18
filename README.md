@@ -1,6 +1,6 @@
 # VivaldiFox
 
-Vivaldi's features for Firefox, as 48 independent toggles.
+Vivaldi's features for Firefox, as 49 independent toggles.
 
 ![VivaldiFox: two-level tab stacks, side panel with notes, accent colour, status bar](docs/screenshot.png)
 
@@ -167,6 +167,7 @@ Options that hold maps or lists are JSON. The settings page validates them and r
 | `page.imageToggle` | Images: all / no third-party / none | JS on a native pref | `reloadOnChange` | Global, not per tab. No "cached images only" mode exists in Firefox |
 | `zoom.perTab` | Zoom applies to the tab, not the whole site | Pref | – | – |
 | `capture` | Full page or visible area to file or clipboard; area selection | JS + Content | `format` (`png`/`jpg`), `folder` | Area selection hands over to Firefox Screenshots |
+| `extensions.toggle` | Toolbar button to disable or restore all extensions, a chosen group, or a single one. Middle-click toggles the group (all if none is chosen). Extensions you had already disabled stay off on restore | JS on the public AddonManager | `selected`, `paused` | Whole browser, not per site. Extensions restart when re-enabled |
 
 ### Status bar
 
