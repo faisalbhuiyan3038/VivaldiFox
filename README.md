@@ -1,6 +1,6 @@
 # VivaldiFox
 
-Vivaldi's features for Firefox, as 49 independent toggles.
+Vivaldi's features for Firefox, as 50 independent toggles.
 
 ![VivaldiFox: two-level tab stacks, side panel with notes, accent colour, status bar](docs/screenshot.png)
 
@@ -168,6 +168,9 @@ Options that hold maps or lists are JSON. The settings page validates them and r
 | `zoom.perTab` | Zoom applies to the tab, not the whole site | Pref | – | – |
 | `capture` | Full page or visible area to file or clipboard; area selection | JS + Content | `format` (`png`/`jpg`), `folder` | Area selection hands over to Firefox Screenshots |
 | `extensions.toggle` | Toolbar button to disable or restore all extensions, a chosen group, or a single one. Middle-click toggles the group (all if none is chosen). Extensions you had already disabled stay off on restore | JS on the public AddonManager | `selected`, `paused` | Whole browser, not per site. Extensions restart when re-enabled |
+| `extensions.siteRules` | Keep one extension, or all of them, off on a page or a whole domain while they keep working elsewhere. **Find Problem Extension** narrows a broken site down to the extension causing it by turning groups off and asking whether the site works | JS + Content | `reloadOnChange` | See note 5 |
+
+5. A rule stops the extension's content scripts, injected scripts and CSS, `webRequest` listeners and `declarativeNetRequest` rules on tabs showing that site, including iframes inside them. The extension's background page keeps running, and browser-wide effects such as proxy settings are not per-site. A domain rule includes its subdomains; a page rule ignores the query string and fragment. Rules are saved in `<profile>/vivaldifox-data/extension-site-rules.json`.
 
 ### Status bar
 
@@ -280,6 +283,7 @@ Known weak points, most fragile first:
 | Area | Features affected | What could break it | What happens then | Fallback |
 |---|---|---|---|---|
 | <a id="the-content-bridge"></a>**Content bridge** (frame scripts) | `nav.fastForward`, `page.actions`, `capture`, `input.spatialNav`, `look.accent` | Mozilla retires the message-manager frame-script API. Firefox 159 already refuses runtime-registered JSWindowActors in web processes, which is why actors are not used | Those features stop reaching the page | The transport is isolated in `core/content.sys.mjs`; only that file needs replacing. Fast Forward still works by URL guessing, accent colour by favicon |
+| **Extension internals** | `extensions.siteRules` | `ChannelWrapper.matches`, `ExtensionDNR.beforeWebRequestEvent` or the content `Script.injectInto` change | The feature reports failure in settings, or a rule stops applying to that path | Extensions keep working normally; `extensions.toggle` still switches them for the whole browser |
 | **Tab groups** | `tabs.twoLevel` | Changes to `tab.group`, `group.tabs`, `group.collapsed` or the `TabGroup*` events | The feature reports failure or the second row stops updating | Native tab groups keep working without it |
 | **Address-bar internals** | `nav.bottom` | The results list stops being an anchored child of `#urlbar` | Results open downwards and are clipped | Rules for the older "breakout" layout are kept alongside; disable the feature |
 | **Toolbar relocation** | `tabs.position` (bottom), `nav.bottom` | CustomizableUI stops tolerating toolbars outside the toolbox, or the nav bar loses its spare window-control box | Window controls missing in bottom-tabs mode | Use left/right (native) or Firefox's Title Bar option |

@@ -189,6 +189,12 @@ export const FEATURES = [
       paused: { type: "json", default: [], label: "Extensions the button has turned off (managed automatically)", live: true },
     },
   },
+  {
+    id: "extensions.siteRules", cat: "Page", title: "Extension site rules",
+    desc: "Keep any extension, or all of them, off on one page or domain, and find which extension is breaking a site.",
+    module: true,
+    options: { reloadOnChange: { type: "bool", default: true, label: "Reload the tab when a rule changes", live: true } },
+  },
 
   // ───────────────────────────── Status bar ─────────────────────────────
   // Keep `statusbar` ahead of the widgets: they pick it as their first-time

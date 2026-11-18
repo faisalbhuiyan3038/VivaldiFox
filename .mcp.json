@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "incognifox": {
+      "command": "node",
+      "args": ["incognifox/server.mjs"]
+    }
+  }
+}
