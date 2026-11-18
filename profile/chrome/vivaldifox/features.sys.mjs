@@ -84,6 +84,19 @@ export const FEATURES = [
     options: { position: { type: "enum", values: ["bottom", "left", "right", "top"], default: "bottom", label: "Position" } },
   },
   {
+    id: "tabs.sidebarAutohide", cat: "Tabs", title: "Auto-hide vertical tabs",
+    desc: "Arc-style auto-hide for Firefox's vertical tabs: the sidebar slides in from the window edge as a floating card (or keeps a strip of icons and expands over the page on hover). Ctrl+Alt+S or the sidebar button pins / unpins it. Replaces Firefox's own expand-on-hover while on.",
+    module: true,
+    options: {
+      mode: { type: "enum", values: ["hidden", "strip"], default: "hidden", label: "When unpinned (hidden = fully hidden, strip = icons stay visible)", live: true },
+      pinned: { type: "bool", default: false, label: "Pinned (always shown)", live: true },
+      key: { type: "string", default: "Ctrl+Alt+S", label: "Pin / unpin shortcut" },
+      revealDelay: { type: "int", default: -1, label: "Reveal delay in ms (-1 = automatic: 0 for hidden, 120 for strip)", live: true },
+      hideDelay: { type: "int", default: 300, label: "Hide delay after the pointer leaves, in ms", live: true },
+      peekOnSwitch: { type: "bool", default: true, label: "Briefly show the sidebar when switching tabs with the keyboard", live: true },
+    },
+  },
+  {
     id: "tabs.tiling", cat: "Tabs", title: "Tab tiling (side by side)",
     desc: "Commands, a button and a tab-menu item to tile two tabs side by side, on top of Firefox's Split View.",
     module: true,

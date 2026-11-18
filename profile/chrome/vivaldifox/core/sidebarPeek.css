@@ -1,0 +1,163 @@
+/* Sidebar peek engine (core/sidebarPeek.sys.mjs). Inert unless the engine has
+   set [vfx-sb-mode] on the root, which it only does while a feature asks.
+
+   The launcher (#sidebar-container > sidebar-main) is taken out of the layout
+   and laid over the page edge, the way Firefox's own expand-on-hover does it,
+   but it is never re-laid out: "hidden" slides it with a transform and
+   "strip" clips it with clip-path. Both are compositor animations. */
+
+/* ── Shared overlay geometry ── */
+/* Same specificity as the per-mode blocks below, which come later and win. */
+:root:is([vfx-sb-mode="hidden"], [vfx-sb-mode="strip"]):not([customizing]) {
+  & #sidebar-container {
+    position: absolute !important;
+    inset-block: 0;
+    /* --vfx-sb-offset: width of the side-panel bar when it shares this edge. */
+    inset-inline: var(--vfx-sb-offset, 0px) auto;
+    z-index: 10;
+    margin: 0 !important;
+    /* The box itself is invisible; only the (clipped) launcher takes clicks,
+       so the page under its empty area stays usable. */
+    pointer-events: none;
+    background: none !important;
+    border: 0 !important;
+  }
+  &[vfx-sb-side="end"] #sidebar-container {
+    inset-inline: auto var(--vfx-sb-offset, 0px);
+  }
+  & #sidebar-container > sidebar-main {
+    pointer-events: auto;
+    /* Opaque surface, built like Firefox's own expanded-on-hover launcher:
+       its toolbox layers over an opaque base matching the colour scheme. */
+    color: var(--toolbox-text-color, inherit);
+    background-color: light-dark(#e8e8e8, #202020);
+    background-image: var(--toolbox-background-gradient, none), image(var(--toolbox-background-color, transparent));
+    background-size: 100vw 100vh, auto;
+  }
+  & #sidebar-launcher-splitter {
+    display: none !important;
+  }
+}
+
+/* ── Hidden (Arc): off-screen, slides in from the edge as a floating card ── */
+:root[vfx-sb-mode="hidden"]:not([customizing]) {
+  & #sidebar-container {
+    inset-block: 6px;
+    inset-inline-start: calc(var(--vfx-sb-offset, 0px) + 6px);
+    border-radius: 12px;
+    overflow: clip;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.28), 0 0 0 0.5px color-mix(in srgb, currentColor 18%, transparent);
+    transform: translateX(calc(-100% - 16px - var(--vfx-sb-offset, 0px)));
+    opacity: 0;
+    transition: transform 0.13s cubic-bezier(0.4, 0, 1, 1), opacity 0.13s ease-in;
+  }
+  &[vfx-sb-side="end"] #sidebar-container {
+    inset-inline: auto calc(var(--vfx-sb-offset, 0px) + 6px);
+    transform: translateX(calc(100% + 16px + var(--vfx-sb-offset, 0px)));
+  }
+  /* While hidden, nothing of it can be hovered or clicked. */
+  &:not([vfx-sb-peek]) #sidebar-container > sidebar-main {
+    pointer-events: none;
+  }
+  &[vfx-sb-peek] #sidebar-container {
+    transform: none;
+    opacity: 1;
+    transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.12s ease-out;
+  }
+  & #sidebar-container > sidebar-main {
+    border-radius: inherit;
+  }
+}
+
+/* The edge strip that reveals a hidden sidebar. */
+#vfx-sb-hotzone {
+  display: none;
+}
+:root[vfx-sb-mode="hidden"]:not([customizing], [inDOMFullscreen]) #vfx-sb-hotzone {
+  display: block;
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--vfx-sb-offset, 0px);
+  width: 6px;
+  z-index: 9;
+}
+:root[vfx-sb-mode="hidden"][vfx-sb-side="end"] #vfx-sb-hotzone {
+  inset-inline: auto var(--vfx-sb-offset, 0px);
+}
+:root[vfx-sb-mode="hidden"][vfx-sb-peek] #vfx-sb-hotzone {
+  /* Once revealed, the gap between edge and card still counts as "on it". */
+  width: 12px;
+}
+
+/* ── Icon strip: the favicon column stays; hovering unclips the rest ── */
+:root[vfx-sb-mode="strip"]:not([customizing]) {
+  & #sidebar-container > sidebar-main {
+    clip-path: inset(0 calc(100% - var(--vfx-sb-strip, 50px)) 0 0);
+    transition: clip-path 0.13s cubic-bezier(0.4, 0, 1, 1);
+  }
+  &[vfx-sb-side="end"] #sidebar-container > sidebar-main {
+    clip-path: inset(0 0 0 calc(100% - var(--vfx-sb-strip, 50px)));
+  }
+  &[vfx-sb-peek] #sidebar-container > sidebar-main {
+    clip-path: inset(0 0 0 0 round 0 12px 12px 0);
+    transition: clip-path 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  &[vfx-sb-peek][vfx-sb-side="end"] #sidebar-container > sidebar-main {
+    clip-path: inset(0 0 0 0 round 12px 0 0 12px);
+  }
+  & #sidebar-container {
+    transition: box-shadow 0.13s;
+  }
+  &[vfx-sb-peek] #sidebar-container {
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.22);
+  }
+  &[vfx-sb-peek][vfx-sb-side="end"] #sidebar-container {
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.22);
+  }
+  /* Titles fade instead of being sliced by the clip edge. */
+  & #tabbrowser-tabs .tabbrowser-tab .tab-label-container,
+  & #tabbrowser-tabs .tab-group-label-container,
+  & #tabbrowser-tabs .tab-close-button {
+    transition: opacity 0.1s;
+  }
+  &:not([vfx-sb-peek]) #tabbrowser-tabs .tabbrowser-tab .tab-label-container,
+  &:not([vfx-sb-peek]) #tabbrowser-tabs .tabbrowser-tab .tab-close-button,
+  &:not([vfx-sb-peek]) :is(#vertical-tabs-newtab-button, #tabs-newtab-button) > .toolbarbutton-text {
+    opacity: 0;
+  }
+  & :is(#vertical-tabs-newtab-button, #tabs-newtab-button) > .toolbarbutton-text {
+    transition: opacity 0.1s;
+  }
+  /* Pinned tabs keep one column in both states, so nothing below them moves
+     when the sidebar opens. */
+  & #tabbrowser-tabs[orient="vertical"] :is(#pinned-tabs-container, #vertical-pinned-tabs-container) {
+    padding-inline: 0 !important;
+  }
+  & #tabbrowser-tabs[orient="vertical"] :is(#pinned-tabs-container, #vertical-pinned-tabs-container)::part(items-wrapper) {
+    grid-template-columns: var(--vfx-sb-strip, 50px) !important;
+    justify-items: center;
+  }
+  & #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[pinned] {
+    width: calc(var(--vfx-sb-strip, 50px) - 8px) !important;
+    margin-inline: 0 !important;
+  }
+  /* The page starts after the strip. */
+  &:not([vfx-sb-side="end"]) #tabbrowser-tabbox:not([sidebar-panel-open]),
+  &:not([vfx-sb-side="end"]) #sidebar-box[sidebar-panel-open] {
+    margin-inline-start: var(--vfx-sb-strip, 50px) !important;
+  }
+  &[vfx-sb-side="end"] #tabbrowser-tabbox:not([sidebar-panel-open]),
+  &[vfx-sb-side="end"] #sidebar-box[sidebar-panel-open] {
+    margin-inline-end: var(--vfx-sb-strip, 50px) !important;
+  }
+}
+
+/* ── Gone: not shown at all ── */
+:root[vfx-sb-mode="gone"]:not([customizing]) :is(#sidebar-container, #sidebar-launcher-splitter) {
+  display: none !important;
+}
+
+/* Reduced motion / sidebar.animation.enabled = false: no animation. */
+:root[vfx-sb-instant] :is(#sidebar-container, #sidebar-container > sidebar-main) {
+  transition: none !important;
+}

@@ -1,7 +1,11 @@
 /* MPL-2.0. L5: hide the user interface. A command/shortcut (default Ctrl+F11)
  * hides all toolbars; with "reveal on hover" the toolbars slide back in while
- * the pointer is at the top edge or the address bar has focus. */
+ * the pointer is at the top edge or the address bar has focus. With vertical
+ * tabs the sidebar hides too and, with "reveal on hover", slides in from its
+ * own edge (shared engine in core/sidebarPeek.sys.mjs; inert with horizontal
+ * tabs). */
 import { comboOf, normalizeCombo } from "../../core/keys.sys.mjs";
+import { SidebarPeek } from "../../core/sidebarPeek.sys.mjs";
 
 /** Shared across windows so the toggle is global, like Vivaldi's. */
 let hidden = false;
@@ -23,9 +27,18 @@ export default {
     const toolbox = doc.getElementById("navigator-toolbox");
     if (!toolbox) throw new Error("#navigator-toolbox not found");
     const mode = ctx.opt("revealOnHover") ? "hover" : "full";
+    let sidebar = null; // child scope holding the sidebar request while hidden
     const apply = () => {
       if (hidden) root.setAttribute("vfx-ui-hidden", mode);
       else root.removeAttribute("vfx-ui-hidden");
+      if (hidden && !sidebar) {
+        sidebar = scope.child();
+        // The toolbars hide even if the sidebar part fails in some Firefox version.
+        try { SidebarPeek.request(sidebar, win, { mode: mode === "hover" ? "hidden" : "gone", priority: 20, peekOnSwitch: false }); } catch (e) { console.error("[vivaldifox:look.autohide] sidebar", e); }
+      } else if (!hidden && sidebar) {
+        sidebar.dispose();
+        sidebar = null;
+      }
     };
     listeners.add(apply);
     scope.add(() => { listeners.delete(apply); root.removeAttribute("vfx-ui-hidden"); });

@@ -57,6 +57,21 @@ const openTab = async (url, opts = {}) => {
   return tab;
 };
 const page = html => "data:text/html;charset=utf-8," + encodeURIComponent(html);
+// Real pointer input: moves the mouse in the chrome window, which drives
+// :hover and mouseenter/leave exactly as a user's pointer would.
+// Uses the EventUtils copy that ships with Firefox's remote agent (the same
+// code WebDriver pointer actions run), loaded once per window.
+const EU = win.vfxTestEventUtils || (() => {
+  const o = { window: win, parent: win, _EU_Ci: Ci, _EU_Cc: Cc };
+  Services.scriptloader.loadSubScript("chrome://remote/content/external/EventUtils.js", o);
+  Object.defineProperty(win, "vfxTestEventUtils", { value: o, configurable: true, enumerable: false });
+  return o;
+})();
+const mouseAt = (x, y) => EU.synthesizeMouseAtPoint(x, y, { type: "mousemove" }, win);
+const rect = el => el.getBoundingClientRect();
+// Files under test/fixtures/ (e.g. a test extension).
+const fixture = name => PathUtils.join(${JSON.stringify(path.join(DIR, "fixtures"))}, ...name.split("/"));
+const hover = el => { const r = rect(el); mouseAt(r.left + r.width / 2, r.top + r.height / 2); };
 const web = html => "${HTTP}/html?b=" + encodeURIComponent(html);
 const st = id => VivaldiFox.status().find(s => s.id === id);
 // Run code inside the tab's content process (frame script); resolves its return value.

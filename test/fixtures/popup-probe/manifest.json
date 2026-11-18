@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "VivaldiFox test: popup size probe",
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vfx-popup-probe@test"
+    }
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "probe"
+  }
+}

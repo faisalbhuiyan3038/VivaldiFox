@@ -1,0 +1,1 @@
+const r = () => { document.title = `vw=${innerWidth} vh=${innerHeight} body=${document.body.getBoundingClientRect().width} dpr=${devicePixelRatio.toFixed(3)}`; }; addEventListener("resize", r); r(); setInterval(r, 200);

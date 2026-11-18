@@ -219,6 +219,7 @@ function restart(st) {
 function onWindow(win) {
   loadSheet(win, `${BASE}core/core.css`);
   loadSheet(win, `${BASE}core/panels.css`);
+  loadSheet(win, `${BASE}core/sidebarPeek.css`);
   win.document.documentElement.setAttribute("vivaldifox", "true");
   for (const st of state.values()) if (st.running && st.ready) attachWindow(st, win);
   addToolsMenuItem(win);

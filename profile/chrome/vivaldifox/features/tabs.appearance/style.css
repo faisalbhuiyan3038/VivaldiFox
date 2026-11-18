@@ -86,7 +86,9 @@
   background-color: color-mix(in srgb, AccentColor 18%, transparent) !important;
   box-shadow: none !important;
 }
-:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab .tab-content {
+/* Expanded only: in the collapsed launcher Firefox centres the icon, and
+   padding there would push it off-centre and make it jump on expand. */
+:root[vfx-vtabs][vfx-vtab-style] #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab:not([pinned]) .tab-content {
   padding-inline: 10px 6px !important;
   gap: 2px;
 }
@@ -169,20 +171,29 @@
   background-color: var(--toolbar-bgcolor, var(--toolbox-bgcolor, Canvas));
   --chrome-content-separator-color: transparent;
 }
-:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float] :is(#sidebar-main, sidebar-main, #vertical-tabs) {
+/* Not while the sidebar overlays the page (auto-hide): it needs its own surface then. */
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float]:not([vfx-sb-mode="hidden"], [vfx-sb-mode="strip"]) :is(#sidebar-main, sidebar-main, #vertical-tabs) {
   background-color: transparent !important;
   border: 0 !important;
 }
 :root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float]:not([inFullscreen], [inDOMFullscreen]) #tabbrowser-tabbox {
-  margin-block: 0 8px !important;
-  margin-inline: 0 8px !important;
+  /* Only the far side and the bottom: the sidebar side belongs to Firefox
+     (its expand-on-hover compensation) or to the auto-hide engine. Setting it
+     here is what made the page jump on every hover. */
+  margin-block-end: 8px !important;
+  margin-inline-end: 8px !important;
   border-radius: 10px !important;
   overflow: clip !important;
   outline: none !important;
   box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 9%, transparent), 0 2px 12px rgba(0, 0, 0, 0.14) !important;
 }
 :root[vfx-vtabs="end"][vfx-vtab-style][vfx-vtab-float]:not([inFullscreen], [inDOMFullscreen]) #tabbrowser-tabbox {
-  margin-inline: 8px 0 !important;
+  margin-inline-end: 0 !important;
+  margin-inline-start: 8px !important;
+}
+/* Auto-hidden sidebar (nothing docked on that side): inset the card there too. */
+:root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float][vfx-sb-mode="hidden"]:not([inFullscreen], [inDOMFullscreen]) #tabbrowser-tabbox {
+  margin-inline: 8px !important;
 }
 :root[vfx-vtabs][vfx-vtab-style][vfx-vtab-float] #nav-bar {
   border-bottom-color: transparent !important;

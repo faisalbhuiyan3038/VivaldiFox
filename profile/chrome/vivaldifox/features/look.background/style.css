@@ -43,8 +43,9 @@
   background-color: color-mix(in srgb, var(--vfx-accent) var(--vfx-tabbar-opacity, 30%), transparent) !important;
 }
 
-/* Vertical tabs and the sidebar: the image shows through them too. */
-:root[vfx-window-bg] :is(#sidebar-main, sidebar-main, #sidebar-box) {
+/* Vertical tabs and the sidebar: the image shows through them too (docked). */
+:root[vfx-window-bg]:not([vfx-sb-mode="hidden"], [vfx-sb-mode="strip"]) :is(#sidebar-main, sidebar-main, #sidebar-box),
+:root[vfx-window-bg]:is([vfx-sb-mode="hidden"], [vfx-sb-mode="strip"]) #sidebar-box {
   background-color: color-mix(in srgb, var(--toolbox-bgcolor, Canvas) var(--vfx-tabbar-opacity, 30%), transparent) !important;
   background-image: none !important;
 }
@@ -57,4 +58,18 @@
 :root[vfx-window-bg] #urlbar:not([focused], [open]) > .urlbar-background,
 :root[vfx-window-bg] #searchbar:not(:focus-within) {
   background-color: color-mix(in srgb, var(--toolbar-field-background-color, Field) var(--vfx-field-opacity, 85%), transparent) !important;
+}
+
+/* Auto-hidden sidebar laid over the page: opaque, showing the part of the
+   image the window would show there (fixed attachment), over the theme's
+   toolbox colour so the page never shows through. */
+:root[vfx-window-bg]:is([vfx-sb-mode="hidden"], [vfx-sb-mode="strip"]) #sidebar-container > sidebar-main {
+  background-color: light-dark(#e8e8e8, #202020) !important;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--toolbox-bgcolor, Canvas) var(--vfx-tabbar-opacity, 30%), transparent), color-mix(in srgb, var(--toolbox-bgcolor, Canvas) var(--vfx-tabbar-opacity, 30%), transparent)),
+    var(--vfx-window-bg) !important;
+  background-size: auto, cover !important;
+  background-position: 0 0, center !important;
+  background-attachment: scroll, fixed !important;
+  background-repeat: no-repeat !important;
 }

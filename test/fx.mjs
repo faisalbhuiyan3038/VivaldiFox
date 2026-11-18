@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Test harness CLI. Drives a private copy of Firefox through Marionette.
 //
+//   node test/fx.mjs setup [stable|nightly] [--from <dir>]   copy an installed Firefox into .test/
 //   node test/fx.mjs start [stable|nightly] [--keep] [--no-mod]
 //   node test/fx.mjs eval  "<chrome-context JS function body>"   (or @file.js)
 //   node test/fx.mjs aeval "<async body; call resolve(v)>"       (or @file.js)
@@ -23,9 +24,10 @@ const PORT = 2829;
 const [cmd, ...rest] = process.argv.slice(2);
 
 function installMod(appDir, profile) {
-  fs.copyFileSync(path.join(ROOT, "install", "config.js"), path.join(appDir, "config.js"));
-  fs.mkdirSync(path.join(appDir, "defaults", "pref"), { recursive: true });
-  fs.copyFileSync(path.join(ROOT, "install", "config-prefs.js"), path.join(appDir, "defaults", "pref", "config-prefs.js"));
+  const res = resourcesOf(appDir);
+  fs.copyFileSync(path.join(ROOT, "install", "config.js"), path.join(res, "config.js"));
+  fs.mkdirSync(path.join(res, "defaults", "pref"), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, "install", "config-prefs.js"), path.join(res, "defaults", "pref", "config-prefs.js"));
   const dst = path.join(profile, "chrome");
   fs.rmSync(path.join(dst, "vivaldifox"), { recursive: true, force: true });
   fs.cpSync(path.join(ROOT, "profile", "chrome"), dst, { recursive: true });
@@ -40,7 +42,40 @@ async function session() {
 
 const body = a => (a.startsWith("@") ? fs.readFileSync(a.slice(1), "utf8") : a);
 
-if (cmd === "start") {
+/** Usual install locations of each channel, per platform. */
+function candidates(channel) {
+  const nightly = channel === "nightly";
+  if (process.platform === "win32") {
+    const roots = [process.env.ProgramFiles, process.env["ProgramFiles(x86)"], process.env.LOCALAPPDATA].filter(Boolean);
+    return roots.map(r => path.join(r, nightly ? "Firefox Nightly" : "Mozilla Firefox"));
+  }
+  if (process.platform === "darwin") return [nightly ? "/Applications/Firefox Nightly.app" : "/Applications/Firefox.app"];
+  return nightly ? ["/opt/firefox-nightly", "/usr/lib/firefox-nightly"] : ["/usr/lib/firefox", "/usr/lib64/firefox", "/opt/firefox"];
+}
+const binaryOf = appDir => process.platform === "win32" ? path.join(appDir, "firefox.exe")
+  : process.platform === "darwin" ? path.join(appDir, "Contents", "MacOS", "firefox") : path.join(appDir, "firefox");
+/** Folder that holds defaults/ and receives config.js (Resources/ on macOS). */
+const resourcesOf = appDir => (process.platform === "darwin" ? path.join(appDir, "Contents", "Resources") : appDir);
+
+if (cmd === "setup") {
+  // Copies an installed Firefox into .test/ so tests never touch the real
+  // installation (the copy receives the autoconfig hook, the original does not).
+  const channel = rest.find(a => !a.startsWith("--")) || "stable";
+  const fromIdx = rest.indexOf("--from");
+  const from = fromIdx >= 0 ? rest[fromIdx + 1] : candidates(channel).find(d => fs.existsSync(binaryOf(d)));
+  if (!from || !fs.existsSync(binaryOf(from))) {
+    console.error(`No Firefox ${channel} found. Looked in:\n  ${candidates(channel).join("\n  ")}\nPass --from <folder containing the Firefox binary>.`);
+    process.exit(1);
+  }
+  const dst = path.join(T, `fx-${channel}`);
+  fs.rmSync(dst, { recursive: true, force: true });
+  fs.mkdirSync(T, { recursive: true });
+  console.log(`copying ${from} -> ${dst} …`);
+  fs.cpSync(from, dst, { recursive: true });
+  const ini = path.join(resourcesOf(dst), "application.ini");
+  const version = fs.existsSync(ini) ? /^Version=(.+)$/m.exec(fs.readFileSync(ini, "utf8"))?.[1] : "?";
+  console.log(`ready: Firefox ${version} in ${dst}`);
+} else if (cmd === "start") {
   const channel = rest.find(a => !a.startsWith("--")) || "stable";
   const appDir = path.join(T, `fx-${channel}`);
   const profile = path.join(T, `profile-${channel}`);
@@ -67,7 +102,11 @@ if (cmd === "start") {
   ].join("\n"));
   if (!rest.includes("--no-mod")) installMod(appDir, profile);
   const out = fs.openSync(path.join(T, `firefox-${channel}.log`), "w");
-  const child = spawn(path.join(appDir, "firefox.exe"),
+  if (!fs.existsSync(binaryOf(appDir))) {
+    console.error(`No test Firefox in ${appDir}. Run: node test/fx.mjs setup ${channel}`);
+    process.exit(1);
+  }
+  const child = spawn(binaryOf(appDir),
     ["-profile", profile, "-no-remote", "-marionette", "-purgecaches", "about:blank"],
     { detached: true, stdio: ["ignore", out, out], env: { ...process.env, MOZ_CRASHREPORTER_DISABLE: "1", MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: "1" } });
   child.unref();
@@ -106,9 +145,12 @@ if (cmd === "start") {
   try {
     const s = JSON.parse(fs.readFileSync(STATE, "utf8"));
     await new Promise(r => setTimeout(r, 1500));
-    try { execSync(`taskkill /PID ${s.pid} /T /F`, { stdio: "ignore" }); } catch {}
+    try {
+      if (process.platform === "win32") execSync(`taskkill /PID ${s.pid} /T /F`, { stdio: "ignore" });
+      else process.kill(s.pid, "SIGKILL");
+    } catch {}
   } catch {}
   console.log("stopped");
 } else {
-  console.log("usage: fx.mjs start|eval|aeval|shot|sync|stop");
+  console.log("usage: fx.mjs setup|start|eval|aeval|shot|sync|stop");
 }

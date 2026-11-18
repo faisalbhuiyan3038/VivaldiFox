@@ -139,6 +139,7 @@ Options that hold maps or lists are JSON. The settings page validates them and r
 | `tabs.muteOthers` | "Mute Other Tabs"; optional audio only in the active tab | JS | `activeOnly` | – |
 | `tabs.appearance` | Close-button placement, unread dot, bold active title, minimum width; Arc-inspired restyle of native vertical tabs (rounded rows, raised selected tab, pinned-tab tile grid, page as a rounded inset card) | CSS + JS | `closeButton` (`default`/`hover`/`left`/`hidden`), `unreadIndicator`, `activeBold`, `minWidth`, `verticalStyle` (`arc`/`compact`/`default`), `floatingPage`, `favoritesGrid` | Vertical styling relies on Firefox's vertical-tab element ids |
 | `tabs.position` | Tab bar at the bottom, left or right | Pref (left/right), JS + CSS (bottom) | `position` | See note 1 |
+| `tabs.sidebarAutohide` | Arc-style auto-hide for native vertical tabs: **hidden** (slides in from the window edge as a floating card) or **strip** (icons stay; hovering expands it over the page). Ctrl+Alt+S or the sidebar button pins / unpins; Esc dismisses a peek; a brief peek on keyboard tab switches | JS + core CSS | `mode`, `pinned`, `key`, `revealDelay`, `hideDelay`, `peekOnSwitch` | Replaces Firefox's own expand-on-hover while on (restored when off; your `sidebar.visibility` is not changed). Uses `SidebarController`'s launcher state |
 | `tabs.tiling` | Tile two tabs side by side: command, button, tab-menu item | JS on native Split View | – | Two tabs only; no grids |
 | `tabs.workspaces` | Named sets of tabs; only the active set is shown. Tab groups stay in their workspace. Scroll over the workspace button (or swipe horizontally over vertical tabs) to switch | JS | `wheelSwitch`, `swipeSwitch` | See note 2 |
 | `tabs.sessions` | Save the open tabs under a name; reopen here or in a new window | JS | – | Saves address, title, pinned state; not per-tab history |
@@ -224,7 +225,7 @@ Gestures and rocker gestures make context menus open on mouse-up on every platfo
 | `look.rounding` | One corner radius for tabs, fields, buttons, popups | CSS | `radius` | – |
 | `look.uiZoom` | Zoom the interface without zooming pages; extension popups get the same zoom so they are sized correctly | JS | `percent` | – |
 | `look.background` | Image behind the whole window frame (toolbars, tab bar, vertical tabs, panels, status bar) | CSS | `image`, `toolbarOpacity`, `tabbarOpacity`, `fieldOpacity` | With `look.accent` on, the accent tints the tab bar over the image |
-| `look.autohide` | Ctrl+F11 hides all toolbars; optional reveal on hover | JS + CSS | `key`, `revealOnHover`, `startHidden` | Toolbars stay visible while the address bar has focus |
+| `look.autohide` | Ctrl+F11 hides all toolbars, and vertical tabs too; optional reveal on hover (toolbars at the top edge, the sidebar at its own edge) | JS + CSS | `key`, `revealOnHover`, `startHidden` | Toolbars stay visible while the address bar has focus |
 | `look.menuButton` | One button opening the classic File/Edit/View menus | JS | – | Not useful on macOS, where the menu bar is the system's |
 
 ### Already native in Firefox
@@ -316,6 +317,7 @@ profile/chrome/vivaldifox/
     pointer.sys.mjs        context-menu suppression for gestures
     content.sys.mjs        the content bridge
     panels.sys.mjs/.css    side-panel host
+    sidebarPeek.sys.mjs/.css  auto-hide engine for the vertical-tabs sidebar (transform / clip-path, no reflow)
     relocate.sys.mjs       order-independent toolbar relocation
     store.sys.mjs          JSON files in <profile>/vivaldifox-data/
     ui.sys.mjs, toast.sys.mjs
@@ -348,6 +350,7 @@ Shared infrastructure is allowed only when it is inert on its own. The panel hos
 ## Testing
 
 ```bash
+node test/fx.mjs setup stable        # once: copies your installed Firefox into .test/fx-stable (or: --from <folder>)
 node test/fx.mjs start stable        # or: nightly. Launches a private Firefox copy with a clean profile
 node test/run.mjs                    # each feature alone
 node test/run.mjs --all-on           # everything enabled together
@@ -355,7 +358,7 @@ node test/run.mjs tabs.workspaces    # selected cases
 node test/fx.mjs stop
 ```
 
-The harness expects copies of Firefox in `.test/fx-stable` and `.test/fx-nightly` (not committed); it never touches your real installation or profile. For each case the runner enables only that feature, checks it reports running, drives it inside the browser, disables it, and then asserts that no `vfx-*` node, root attribute, CSS variable or window property remains and that the mod logged no console error.
+`setup` copies an installed Firefox into `.test/fx-<channel>` (git-ignored, about 0.5 GB); the copy receives the autoconfig hook, so the harness never touches your real installation or profile. Cases can drive real pointer input (`mouseAt`, `hover`, which go through the same EventUtils code as WebDriver actions, without moving your cursor), and load files from `test/fixtures/` (e.g. a probe extension for popup sizing). For each case the runner enables only that feature, checks it reports running, drives it inside the browser, disables it, and then asserts that no `vfx-*` node, root attribute, CSS variable or window property remains and that the mod logged no console error.
 
 ## Credits and licences
 
